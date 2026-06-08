@@ -1,0 +1,333 @@
+/* --- レイアウト構造 --- */
+
+/* 画面全体の土台 */
+.wrapper {
+  background-color: #f0f2f5; /* 集中力を高める落ち着いたグレー */
+  min-height: 100vh;
+  display: flex;
+  justify-content: center; /* 左右に余白を作り、コンテンツを中央に配置 */
+}
+
+/* メインコンテンツの器 */
+.container {
+  width: 100%;
+  max-width: 1200px; /* PCでの「狭さ」を解消するため、最大幅を広く設定 */
+  height: 100vh;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column; /* ヘッダー・メイン・フッターを縦に並べる */
+  box-shadow: 0 0 20px rgba(0,0,0,0.1); /* 浮き出し効果でページを際立たせる */
+}
+
+/* --- ヘッダー --- */
+
+.header {
+  padding: 24px 40px;
+  border-bottom: 1px solid #eee; /* コンテンツエリアとの明確な境界線 */
+}
+
+.headerTop {
+  display: flex;
+  justify-content: space-between; /* タイトルとボタンを両端に配置 */
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.title {
+  font-size: 1.4rem;
+  margin: 0;
+  color: #333;
+}
+
+.saveButton {
+  background-color: #4fc3f7;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.saveButton:hover {
+  opacity: 0.8;
+}
+
+.settingsPanel {
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid #dbeafe;
+  background: #f8fbff;
+  border-radius: 10px;
+}
+
+.settingsTitle {
+  margin: 0 0 10px;
+  color: #1e3a8a;
+  font-weight: 700;
+}
+
+.apiKeyInput {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 0 12px;
+  font: inherit;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+
+.apiKeyInput:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.settingsActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* --- リスト（メインスクロールエリア） --- */
+
+.list {
+  flex: 1; /* 残りの高さをすべて占有 */
+  overflow-y: auto; /* カードが増えた場合にここだけスクロールさせる */
+  padding: 30px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* カード同士の間隔 */
+}
+
+/* 単語カード1枚のデザイン */
+.card {
+  border: 1px solid #eee;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex; /* PCでは問題と答えを横に並べる */
+  gap: 40px; /* 左右の情報の区切りを明確にする広い間隔 */
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.card:hover {
+  background-color: #fafafa;
+  transform: translateY(-2px); /* わずかに浮かすことで選択感を演出 */
+}
+
+/* カード左：問題側 */
+.cardLeft {
+  flex: 1; /* 左右の比率設定 */
+  border-right: 1px solid #f0f0f0; /* 垂直の仕切り線 */
+  padding-right: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* カード右：回答入力側 */
+.cardRight {
+  flex: 1.5; /* 回答欄を広く取り、入力しやすくする */
+}
+
+/* --- パーツ要素 --- */
+
+/* 問題・答えなどのラベル */
+.labelTag {
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: bold;
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+.questionInput {
+  display: block;
+  width: 100%;
+  font-size: 1.3rem;      /* 元のh2に近いサイズ */
+  font-weight: bold;
+  margin: 10px 0;
+  padding: 8px;
+  border: 1px solid transparent; /* 初期状態は枠線なし */
+  border-radius: 6px;
+  background-color: transparent;
+  color: #333;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+/* ホバーまたはフォーカスした時に編集可能であることを強調 */
+.questionInput:hover {
+  background-color: #f5f5f5;
+  border-color: #ddd;
+}
+
+.questionInput:focus {
+  background-color: #fff;
+  border-color: #2196f3;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+}
+
+.markerInfo {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.iconGroup {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  min-height: 20px;
+
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+/* --- アイコンボタン共通スタイル --- */
+.iconBtn {
+  display: flex;           /* アイコンと文字を横並びに */
+  align-items: center;     /* 上下中央揃え */
+  gap: 6px;                /* アイコンと文字の間の余白 */
+  padding: 6px 12px;       /* 押しやすいように内側の余白を確保 */
+  border-radius: 8px;      /* 角を丸めてモダンな印象に */
+  cursor: pointer;
+  font-weight: bold;       /* 文字を読みやすく太字に */
+  font-size: 0.85rem;      /* 文字サイズを調整 */
+  transition: all 0.2s ease;
+  border: 1px solid transparent; /* 初期状態の枠線 */
+}
+
+/* ボタン内のテキスト用 */
+.btnText {
+  white-space: nowrap;     /* 文字を改行させない */
+}
+
+/* --- AI再生成ボタン（青/水色系） --- */
+.reconstruct {
+  background-color: #f0f9ff;
+  color: #0288d1;
+  border-color: #b3e5fc;
+}
+
+.reconstruct:hover {
+  background-color: #0288d1;
+  color: #ffffff;
+  border-color: #0288d1;
+}
+
+/* --- 削除ボタン（赤系） --- */
+.delete {
+  background-color: #fff5f5;
+  color: #d32f2f;
+  border-color: #ffcdd2;
+}
+
+.delete:hover {
+  background-color: #d32f2f;
+  color: #ffffff;
+  border-color: #d32f2f;
+}
+
+/* クリック時のフィードバック */
+.iconBtn:active {
+  transform: scale(0.95); /* 押した時に少し沈む演出 */
+}
+
+/* --- スマホ対応 --- */
+@media (max-width: 768px) {
+  .btnText {
+    display: none; /* スマホでは画面が狭いので、アイコンのみ表示してスッキリさせる（任意） */
+  }
+  .iconBtn {
+    padding: 8px; /* アイコンのみの場合は正方形に近く */
+  }
+}
+
+.tagQuestion { background: #e8f5e9; color: #2e7d32; }
+.tagAnswer { background: #e3f2fd; color: #1976d2; }
+
+.questionText {
+  font-size: 1.3rem;
+  margin: 10px 0;
+  line-height: 1.4;
+}
+
+/* マーカーの丸ポチ */
+.markerDot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+/* 回答編集エリア */
+.textarea {
+  width: 90%;
+  height: 120px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  font-size: 1rem;
+  resize: vertical; /* ユーザーが必要に応じて高さを変えられる */
+  line-height: 1.6;
+}
+
+/* --- フッター --- */
+
+.footer {
+  padding: 20px 40px;
+  display: flex;
+  gap: 20px;
+  border-top: 1px solid #eee;
+  background-color: #fff;
+}
+
+.resetBtn, .moveBtn {
+  flex: 1;
+  padding: 16px;
+  border-radius: 12px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.resetBtn { background: #37474f; color: white; }
+.moveBtn { background: #2196f3; color: white; }
+
+/* --- スマホ対応 (Responsive) --- */
+
+@media (max-width: 768px) {
+  /* 画面いっぱいに広げる */
+  .container { 
+    max-width: 100%; 
+  }
+
+  /* 横並びを縦並びへ変更 */
+  .card { 
+    flex-direction: column; 
+    gap: 20px; 
+    padding: 16px; 
+  }
+
+  /* 仕切り線を横線に変更 */
+  .cardLeft { 
+    border-right: none; 
+    border-bottom: 1px solid #f0f0f0; 
+    padding-right: 0;
+    padding-bottom: 16px; 
+  }
+
+  /* スマホの操作性を考慮して余白を調整 */
+  .header, .list, .footer { 
+    padding: 16px; 
+  }
+}
