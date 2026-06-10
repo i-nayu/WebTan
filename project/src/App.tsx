@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 
-// import BookList from './Pages/BookList/BookList';
+import BookList from './Pages/BookList/BookList';
 // import CardList from './Pages/CardList/CardList';
 import ReviewWords from './Pages/ReviewWords/ReviewWords';
 
@@ -15,7 +15,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           {/* 単語帳一覧画面 */}
-          {/* <Route path="/" element={<BookList />} /> */}
+          <Route path="/" element={<BookList />} />
 
           {/* 単語確認画面 */}
           <Route path="/review" element={<ReviewWords />} />
