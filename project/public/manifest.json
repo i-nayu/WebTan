@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "WordMarker",
+  "version": "1.0",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "commands": {
+    "toggle-marker": {
+      "suggested_key": {
+        "default": "Shift+Alt+M",
+        "mac": "Command+MacCtrl+M"
+      },
+      "description": "Toggle marker"
+    },
+    "save-highlights": {
+      "suggested_key": {
+        "default": "Alt+Shift+M",
+        "mac": "Alt+Shift+M"
+      },
+      "description": "Save highlights"
+    }
+  }
+}
