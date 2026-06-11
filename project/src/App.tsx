@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 
 import BookList from './Pages/BookList/BookList';
-// import CardList from './Pages/CardList/CardList';
+import CardList from './Pages/CardList/CardList';
 import ReviewWords from './Pages/ReviewWords/ReviewWords';
 
 import 'react-toastify/dist/ReactToastify.css';
@@ -10,7 +10,9 @@ import 'react-toastify/dist/ReactToastify.css';
 function App() {
   return (
     <>
-      <ToastContainer />
+      <ToastContainer
+        autoClose={1000}
+      />
 
       <BrowserRouter>
         <Routes>
@@ -21,7 +23,7 @@ function App() {
           <Route path="/review" element={<ReviewWords />} />
 
           {/* 学習画面 */}
-          {/* <Route path="/card/:id" element={<CardList />} /> */}
+          <Route path="/card/:id" element={<CardList />} />
         </Routes>
       </BrowserRouter>
     </>
