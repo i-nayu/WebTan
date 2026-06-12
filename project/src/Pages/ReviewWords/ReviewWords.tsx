@@ -16,6 +16,7 @@ interface WordCard {
 }
 
 const ReviewWords: React.FC = () => {
+    const API_KEY_STORAGE_KEY = 'apiKey';
     // ======================================================
     // 変数
     // ======================================================
@@ -25,6 +26,7 @@ const ReviewWords: React.FC = () => {
 
     // 入力エラー管理
     const [errors, setErrors] = useState<Record<string, string>>({});
+
 
     // ページ遷移
     const navigate = useNavigate();
@@ -41,10 +43,61 @@ const ReviewWords: React.FC = () => {
     // ======================================================
     // Gemini APIキーをローカルストレージから読み込み
     // ======================================================
-    useEffect(() => { //同じページで使用するためローカルストレージ
-        const savedApiKey = localStorage.getItem('api_key') ?? '';
+    useEffect(() => {
+        const chromeApi = (window as any).chrome;
+
+        if (chromeApi?.storage?.local) {
+            chromeApi.storage.local.get([API_KEY_STORAGE_KEY], (res: any) => {
+                const savedApiKey = res?.[API_KEY_STORAGE_KEY] ?? '';
+                setApiKey(savedApiKey);
+            });
+            return;
+        }
+
+        const savedApiKey = localStorage.getItem(API_KEY_STORAGE_KEY) ?? localStorage.getItem('api_key') ?? '';
         setApiKey(savedApiKey);
     }, []);
+
+    // ======================================================
+    // API結果の受信
+    // ======================================================
+    useEffect(() => {
+        const handleMessage = (event: MessageEvent) => {
+            if (event.data?.type === 'API_KEY_RESULT') {
+                setApiKey(event.data.apiKey ?? '');
+            }
+        };
+
+        window.addEventListener('message', handleMessage);
+
+        return () => {
+            window.removeEventListener('message', handleMessage);
+        };
+    }, []);
+
+    // ======================================================
+    // APIキーリクエスト
+    // ======================================================
+    const getApiKey = (): Promise<string> => {
+        return new Promise((resolve) => {
+
+            const handler = (event: MessageEvent) => {
+                if (event.data?.type === 'API_KEY_RESULT') {
+                    window.removeEventListener('message', handler);
+                    resolve(event.data.apiKey ?? '');
+                }
+            };
+
+            window.addEventListener('message', handler);
+
+            window.postMessage(
+                {
+                    type: 'REQUEST_API_KEY',
+                },
+                '*'
+            );
+        });
+    };
 
     // ======================================================
     // カード一覧表示
@@ -54,7 +107,7 @@ const ReviewWords: React.FC = () => {
         function handleMessage(e: MessageEvent) {
             const data = e.data;
 
-            console.log('ReviewWords received window.message:',data);
+            console.log('ReviewWords received window.message:', data);
 
             if (!data || typeof data !== 'object') {
                 return;
@@ -91,7 +144,7 @@ const ReviewWords: React.FC = () => {
             attempts += 1;
 
             try {
-                window.postMessage({type:'REQUEST_EXTENSION_WORD_CARDS',},'*');
+                window.postMessage({ type: 'REQUEST_EXTENSION_WORD_CARDS', }, '*');
             } catch (e) {
                 console.error(e);
             }
@@ -128,7 +181,7 @@ const ReviewWords: React.FC = () => {
         chromeApi.storage.local.get(
             ['wordCard', 'wordBook', 'highlights'],
             (res: any) => {
-                console.log('storage data:',res.wordCard,res.wordBook,res.highlights);
+                console.log('storage data:', res.wordCard, res.wordBook, res.highlights);
 
                 // wordCard → heghlits の順で優先してカードデータを取得
                 const list =
@@ -159,7 +212,7 @@ const ReviewWords: React.FC = () => {
 
             // highlightsが更新された場合
             if (changes.highlights) {
-                console.log('updated highlights:',changes.highlights.newValue);
+                console.log('updated highlights:', changes.highlights.newValue);
 
                 setCards(changes.highlights.newValue ?? []);
             }
@@ -227,8 +280,8 @@ const ReviewWords: React.FC = () => {
             window.confirm('すべての答えをリセットしてもよろしいですか？')
         ) {
             setCards((currentCards) =>
-                currentCards.map((card) => ({...card, answer: '',})
-             )
+                currentCards.map((card) => ({ ...card, answer: '', })
+                )
             );
         }
     };
@@ -272,7 +325,7 @@ const ReviewWords: React.FC = () => {
             // 既存の単語カードと新しいカードを合体(重複は新しいカード優先)
             chromeApi.storage.local.get(['wordCard', 'wordBook'], (res: any) => {
                 //単語カードの更新
-                const existing = (res && Array.isArray(res.wordCard)) ? res.wordCard : []; 
+                const existing = (res && Array.isArray(res.wordCard)) ? res.wordCard : [];
                 const existingBooks = (res && Array.isArray(res.wordBook)) ? res.wordBook : [];
 
                 const map = new Map<string, any>();
@@ -281,7 +334,7 @@ const ReviewWords: React.FC = () => {
                 toSave.forEach((c) => map.set(c.id, { ...map.get(c.id), ...c })); // 新しいカードで上書き
                 const merged = Array.from(map.values()); //普通の配列に戻す
 
-            
+
                 // 単語帳リストの更新
                 const bookMap = new Map<string, any>();
                 existingBooks.forEach((book: any) => bookMap.set(book.id, book));
@@ -298,7 +351,7 @@ const ReviewWords: React.FC = () => {
 
                 // chrome.storage.localに保存
                 chromeApi.storage.local.set({ wordCard: merged, wordBook: derivedBooks, highlights: merged }, () => {
-                    toast.success('単語帳に保存しました', { autoClose: 3000 }  );
+                    toast.success('単語帳に保存しました');
                     navigate('/');
                 });
             });
@@ -308,11 +361,11 @@ const ReviewWords: React.FC = () => {
         // 保存できない場合にはcontentファイルにメッセージ送信
         try {
             window.postMessage({ type: 'SAVE_EXTENSION_WORD_CARDS', cards: toSave }, '*');
-            toast.info('単語を保存しました', { autoClose: 3000 });
+            toast.info('単語を保存しました');
             navigate('/');
         } catch (e) {
             console.error('postMessage save failed', e);
-            toast.error('単語の保存に失敗しました', { autoClose: 3000 });
+            toast.error('単語の保存に失敗しました' );
         }
 
     };
@@ -320,32 +373,53 @@ const ReviewWords: React.FC = () => {
     // ======================================================
     // APIキー保存
     // ======================================================
-    const handleSaveApiKey = () => {
+    const handleSaveApiKey = async () => {
         const trimmedApiKey = apiKey.trim();
+        console.log('ボタンがクリックされました');
 
         if (!trimmedApiKey) {
-            toast.error('APIキーを入力してください。', { autoClose: 3000 });
+            toast.error('APIキーを入力してください。');
             setIsSettingsOpen(true);
             return;
         }
 
-        localStorage.setItem('api_key', trimmedApiKey);
-        setApiKey(trimmedApiKey);
-        setIsSettingsOpen(false);
-        toast.success('APIキーを保存しました。', { autoClose: 3000 });
+        const chromeApi = (window as any).chrome;
+
+        if (chromeApi?.storage?.local) {
+            chromeApi.storage.local.set({ geminiApiKey: trimmedApiKey });
+            console.log('APIキーをchrome.storageに保存しました');
+            return;
+        }
+
+        try {
+
+            window.postMessage(
+                {
+                    type: 'SAVE_API_KEY',
+                    apiKey: apiKey.trim(),
+                },
+                '*'
+            );
+            console.log('API key sent for saving');
+
+            // setApiKey(trimmedApiKey);
+            setIsSettingsOpen(false);
+            toast.success('APIキーを保存しました。');
+        } catch (error) {
+            console.error(error);
+            toast.error('APIキーの保存に失敗しました。');
+        }
     };
 
 
     // ======================================================
-    // 保存
+    // AI生成
     // ======================================================
     const handleGenerateByAI = async (cardId: string) => {
-        const savedApiKey = localStorage.getItem('api_key') ?? '';
-
-        const usableApiKey = apiKey.trim() || savedApiKey.trim();
+        const usableApiKey = await getApiKey();
 
         if (!usableApiKey) { //APIがない時は入力画面を開く
-            toast.error('AI生成にはAPIキーが必要です。設定画面でAPIキーを入力してください。', { autoClose: 3000 });
+            toast.error('AI生成にはAPIキーが必要です。設定画面でAPIキーを入力してください。'  );
             setIsSettingsOpen(true);
             return;
         }
@@ -355,15 +429,15 @@ const ReviewWords: React.FC = () => {
         );
 
         if (!target) {
-            toast.error('カードが見つかりません。', { autoClose: 3000 });
+            toast.error('カードが見つかりません。');
             return;
         }
 
         setGeneratingId(cardId); //「生成中」の表示に使用
 
         try {
-            const prompt = 
-            `以下の問題に対して、単語帳の「答え」として使える簡潔な説明を日本語で出力してください。問題: ${target.question}`;
+            const prompt =
+                `以下の問題に対して、単語帳の「答え」として使える簡潔な説明を日本語で出力してください。問題: ${target.question}`;
 
             const genAI = new GoogleGenerativeAI(
                 usableApiKey
@@ -410,7 +484,7 @@ const ReviewWords: React.FC = () => {
             const em =
                 error?.message ?? String(error);
 
-            toast.error(`AI生成に失敗しました: ${em}`, { autoClose: 3000 });
+            toast.error(`AI生成に失敗しました: ${em}`);
         } finally {
             setGeneratingId(null);
         }

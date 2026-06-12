@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import styles from './CardList.module.css';
 
 
@@ -21,6 +22,7 @@ interface WordCard {
 // 単語カード一覧ページ
 // ======================================================
 const CardList: React.FC = () => {
+  const API_KEY_STORAGE_KEY = 'apiKey';
 
   // URLパラメータ取得
   const { id } = useParams<{ id: string }>();
@@ -41,11 +43,45 @@ const CardList: React.FC = () => {
   const [newQuestion, setNewQuestion] = useState('');
   const [newAnswer, setNewAnswer] = useState('');
 
+  // APIキー設定モーダル表示状態
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  // Gemini APIキー
+  const [apiKey, setApiKey] = useState('');
+
+  // AI生成中のカードID
+  const [generatingId, setGeneratingId] = useState<string | null>(null);
+
 
   // カード一覧state
   const [cards, setCards] = useState<WordCard[]>([]);
 
   const [filterType, setFilterType] = useState<'all' | 'learned' | 'unlearned'>('all');
+  const [mode, setMode] = useState<'card' | 'test' | 'edit'>('card');
+  const [showModeMenu, setShowModeMenu] = useState(false);
+  const [showAnswers, setShowAnswers] = useState(false);
+
+  const [questionSentence, setQuestionSentence] = useState('');
+  const [answerObj, setAnswerObj] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const chromeApi = (window as any).chrome;
+
+    if (chromeApi?.storage?.local) {
+      chromeApi.storage.local.get([API_KEY_STORAGE_KEY], (res: any) => {
+        const savedApiKey = res?.[API_KEY_STORAGE_KEY] ?? '';
+        if (savedApiKey) {
+          setApiKey(savedApiKey);
+        }
+      });
+      return;
+    }
+
+    const fallbackApiKey = localStorage.getItem(API_KEY_STORAGE_KEY) ?? localStorage.getItem('api_key') ?? '';
+    if (fallbackApiKey) {
+      setApiKey(fallbackApiKey);
+    }
+  }, []);
 
   //絞り込み機能
   const filteredCards = cards.filter((card) => {
@@ -60,6 +96,49 @@ const CardList: React.FC = () => {
         return true;
     }
   });
+
+  // ======================================================
+  // API結果の受信
+  // ======================================================
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'API_KEY_RESULT') {
+        setApiKey(event.data.apiKey ?? '');
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, []);
+
+  // ======================================================
+  // APIキーリクエスト
+  // ======================================================
+  const getApiKey = (): Promise<string> => {
+    return new Promise((resolve) => {
+
+      const handler = (event: MessageEvent) => {
+        if (event.data?.type === 'API_KEY_RESULT') {
+          window.removeEventListener('message', handler);
+          resolve(event.data.apiKey ?? '');
+        }
+      };
+
+      window.addEventListener('message', handler);
+
+      window.postMessage(
+        {
+          type: 'REQUEST_API_KEY',
+        },
+        '*'
+      );
+    });
+  };
+
+
 
   //指定した単語帳に属するカード一覧を生成
   const deriveCardsForBook = (bookId: string, arr: any[] | null) => {
@@ -312,6 +391,12 @@ const CardList: React.FC = () => {
     );
   };
 
+  //長文の方
+  const [isOpen, setIsOpen] = useState(false);
+  const handleToggleSentence = () => {
+    setIsOpen((current) => !current);
+  };
+
   // ======================================================
   // 学習済み状態を切り替え
   // ======================================================
@@ -340,12 +425,164 @@ const CardList: React.FC = () => {
   const handleDelete = (cardId: string) => {
     if (!window.confirm('削除しますか？')) return;
 
-    setCards((currentCards) => {
-      const next = currentCards.filter((card) => card.id !== cardId);
-      persistCards(next);
-      return next;
-    });
+    const nextCards = cards.filter(
+      (card) => card.id !== cardId
+    );
+
+    setCards(nextCards);
+    //content経由で保存
+    try {
+      window.postMessage({ type: 'DELETE_WORD_CARD', cardId: cardId }, '*');
+    } catch (_) {
+      // noop
+    }
+
+    console.log('削除後', nextCards);
   };
+
+  // ======================================================
+  // APIキー保存
+  // ======================================================
+  const handleSaveApiKey = async () => {
+    const trimmedApiKey = apiKey.trim();
+    console.log('ボタンがクリックされました');
+
+    if (!trimmedApiKey) {
+      toast.error('APIキーを入力してください。');
+      setIsSettingsOpen(true);
+      return;
+    }
+
+    const chromeApi = (window as any).chrome;
+
+    if (chromeApi?.storage?.local) {
+      chromeApi.storage.local.set({ geminiApiKey: trimmedApiKey });
+      console.log('APIキーをchrome.storageに保存しました');
+      return;
+    }
+
+    try {
+
+      window.postMessage(
+        {
+          type: 'SAVE_API_KEY',
+          apiKey: apiKey.trim(),
+        },
+        '*'
+      );
+      console.log('API key sent for saving');
+
+      // setApiKey(trimmedApiKey);
+      setIsSettingsOpen(false);
+      toast.success('APIキーを保存しました。');
+    } catch (error) {
+      console.error(error);
+      toast.error('APIキーの保存に失敗しました。');
+    }
+  };
+
+  // ======================================================
+  // AI生成
+  // ======================================================
+  const handleGenerateByAI = async () => {
+
+    const usableApiKey = await getApiKey();
+
+    if (!usableApiKey) { //APIがない時は入力画面を開く
+      toast.error('AI生成にはAPIキーが必要です。設定画面でAPIキーを入力してください。');
+      setIsSettingsOpen(true);
+      return;
+    }
+
+    if (filteredCards.length === 0) {
+      toast.error('カードが見つかりません。');
+      return;
+    }
+
+    const cardInfo = filteredCards
+      .map(
+        (card) =>
+          `用語:${card.question}
+          説明:${card.answer}`
+      )
+      .join('\n\n');
+
+    setGeneratingId('generating'); //「生成中」の表示に使用
+
+    try {
+      const prompt =
+        `以下の用語と説明を使用して、
+        学習用の総合穴埋め問題を1つ作成してください。
+
+        条件:
+        - すべての用語を使用する
+        - 用語名は（①）（②）...のように隠す
+        - 単なる箇条書きは禁止
+        - ストーリー性や流れのある文章にする
+        - 問題の後に、解答を必ずつける
+        - JSON形式のみで回答する
+        - 回答は必ずJSON形式で、他の説明文やMarkdownなどは一切含めないこと
+        出力形式:
+        {
+          "question": "問題文",
+          "answer": {
+            "①": "用語1",
+            "②": "用語2",
+            "③": "用語3"
+          }
+        }${cardInfo}`;
+
+      const genAI = new GoogleGenerativeAI(
+        usableApiKey
+      );
+
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-2.5-flash',
+      });
+
+      const result = await model.generateContent({
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              {
+                text: prompt,
+              },
+            ],
+          },
+        ],
+      });
+
+      const responseText = result.response.text().trim();
+      const cleanedText = responseText
+        .replace(/```json/g, '')
+        .replace(/```/g, '')
+        .trim();
+
+
+      const aiResult = JSON.parse(cleanedText);
+
+      setQuestionSentence(aiResult.question ?? '');
+      setAnswerObj(aiResult.answer ?? {});
+
+      toast.success('文章題を生成しました');
+      console.log('AIレスポンス全体:', responseText);
+      console.log('生成された文章題:', aiResult.question);
+      console.log('解答:', aiResult.answer);
+    } catch (error: any) {
+      console.error(error);
+
+      const em =
+        error?.message ?? String(error);
+
+      toast.error(`AI生成に失敗しました: ${em}`);
+      console.error('AI生成エラー:', error);
+    } finally {
+      setGeneratingId(null);
+
+    };
+  };
+
 
   // ======================================================
   // 画面レイアウト
@@ -353,9 +590,68 @@ const CardList: React.FC = () => {
   return (
     <div className={styles.container}>
 
-
       {/* ヘッダー */}
       <div className={styles.header}>
+        {isSettingsOpen && (
+          <div className={styles.overlay}>
+            <div
+              className={
+                styles.settingsPanel
+              }
+            >
+              <p
+                className={
+                  styles.settingsTitle
+                }
+              >
+                AI生成にはAPIキーが必要です
+              </p>
+
+              <input
+                className={
+                  styles.apiKeyInput
+                }
+                type="password"
+                value={apiKey}
+                onChange={(e) =>
+                  setApiKey(
+                    e.target.value
+                  )
+                }
+              />
+
+              <div
+                className={
+                  styles.settingsActions
+                }
+              >
+                <button
+                  className={
+                    styles.resetBtn
+                  }
+                  onClick={() =>
+                    setIsSettingsOpen(
+                      false
+                    )
+                  }
+                >
+                  閉じる
+                </button>
+
+                <button
+                  className={
+                    styles.saveButton
+                  }
+                  onClick={
+                    handleSaveApiKey
+                  }
+                >
+                  保存
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* 単語帳タイトル */}
         <h1 className={styles.title}>
@@ -369,23 +665,88 @@ const CardList: React.FC = () => {
           <button className={styles.shuffleButton} onClick={handleShuffle}>
             シャッフル
           </button>
+          <button className={styles.modeButton} onClick={() => setShowModeMenu(!showModeMenu)}>
+            モード変更
+          </button>
+
+          <div className={styles.modeWrapper}>
+
+            {showModeMenu && (
+              <div className={styles.modeMenu}>
+                <button className={mode === 'card' ? styles.activeMode : ''} onClick={() => {
+                  setMode('card');
+                  setOpenedIds([]);
+                  setShowAnswers(false);
+                  setShowModeMenu(false);
+                }}
+                >
+                  カードモード
+                </button>
+
+                <button className={mode === 'test' ? styles.activeMode : ''} onClick={() => {
+                  setMode('test');
+                  setOpenedIds([]);
+                  setShowAnswers(false);
+                  setShowModeMenu(false);
+                }}
+                >
+                  テストモード
+                </button>
+
+                <button className={mode === 'edit' ? styles.activeMode : ''} onClick={() => {
+                  setMode('edit');
+                  setOpenedIds([]);
+                  setShowAnswers(false);
+                  setShowModeMenu(false);
+                }}
+                >
+                  編集モード
+                </button>
+              </div>
+            )}
+          </div>
           <div className={styles.filterButtons}>
             <button
+              className={`${styles.filterButton} ${styles.filterAll}`}
               onClick={() => setFilterType('all')}
             >
               全て
             </button>
 
             <button
+              className={`${styles.filterButton} ${styles.filterLearned}`}
               onClick={() => setFilterType('learned')}
             >
               学習済み
             </button>
 
             <button
+              className={`${styles.filterButton} ${styles.filterUnlearned}`}
               onClick={() => setFilterType('unlearned')}
             >
               未学習
+            </button>
+            <button
+              className={`${styles.iconBtn} ${styles.reconstruct}`}
+              title="AIで文章題生成"
+              onClick={() =>
+                handleGenerateByAI()
+              }
+              disabled={
+                generatingId !== null
+              }
+            >
+              {generatingId ? (
+                <span>
+                  ⏳
+                  生成中...
+                </span>
+              ) : (
+                <span>
+                  ✨
+                  AI生成
+                </span>
+              )}
             </button>
           </div>
         </div>
@@ -429,7 +790,7 @@ const CardList: React.FC = () => {
       )}
 
       <div className={styles.cardList}>
-        {filteredCards.map((card) => (
+        {filteredCards.map((card, index) => (
           <div key={card.id} className={styles.card}>
             <div className={styles.cardTop}>
               <label className={styles.checkboxArea}>
@@ -442,38 +803,101 @@ const CardList: React.FC = () => {
 
 
               {/* 問題ボタン */}
-              <button
-                className={styles.questionButton}
+              <div className={styles.questionArea}>
+                <div className={styles.questionText} onClick={() => mode === 'card' && handleToggle(card.id)}>
+                  {mode === 'test' ? `(${index + 1}) ` : ''}
+                  {card.question}
+                </div>
+                {mode === 'card' && (
+                  <button className={styles.arrowButton} onClick={() => handleToggle(card.id)}>
+                    {openedIds.includes(card.id) ? '▲' : '▼'}
+                  </button>
+                )}
 
-                // 答え表示切り替え
-                onClick={() => handleToggle(card.id)}
-              >
-                {card.question}
-              </button>
-
-
+              </div>
               {/* 削除ボタン */}
-              <button
-                className={styles.deleteButton}
-                onClick={() => handleDelete(card.id)}
-              >削除</button>
-
+              {mode === 'edit' && (
+                <button className={styles.deleteButton} onClick={() => handleDelete(card.id)}>
+                  削除
+                </button>
+              )}
             </div>
-
 
             {/* 答え表示エリア */}
-            <div
-              className={`${styles.answer} ${openedIds.includes(card.id)
-                ? styles.answerOpen
-                : ''
-                }`}
-            >
-              {card.answer}
-            </div>
+            {(mode === 'card' || mode === 'edit') && (
+              <div
+                className={`${styles.answer} ${mode === 'edit' || openedIds.includes(card.id)
+                  ? styles.answerOpen
+                  : ''
+                  }`}
+              >
+                {card.answer}
+              </div>
+            )}
 
           </div>
         ))}
+        {mode === 'card' && (
+          <>
+            <button
+              className={styles.questionButton}
+              onClick={() => handleToggleSentence()}
+            >
+              {questionSentence}
+            </button>
+
+            {isOpen && (
+              <div>
+                {Object.entries(answerObj).map(
+                  ([key, value]) => (
+                    <div key={key}>
+                      {key}: {value}
+                    </div>
+                  )
+                )}
+              </div>
+            )}
+          </>
+        )}
+        {mode === 'test' && (
+          <div className={styles.questionButton}>
+            {questionSentence}
+          </div>
+        )}
+
       </div>
+      {mode === 'test' && (
+        <div className={styles.answerList}>
+          <button
+            className={styles.showAnswersButton}
+            onClick={() => setShowAnswers(!showAnswers)}
+          >
+            {showAnswers ? '解答を隠す' : '解答一覧を表示'}
+          </button>
+
+          {showAnswers && (
+            <>
+              <h2>解答一覧</h2>
+
+              {filteredCards.map((card, index) => (
+                <div
+                  key={`answer-${card.id}`}
+                  className={styles.answerItem}
+                >
+                  <strong>({index + 1})</strong> {card.answer}
+                </div>
+              ))}
+              {Object.entries(answerObj).map(
+                ([key, value]) => (
+                  <div key={key}>
+                    {key}: {value}
+                  </div>
+                )
+              )}
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 };

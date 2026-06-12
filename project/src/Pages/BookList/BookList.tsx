@@ -54,9 +54,9 @@ const WordBookList: React.FC = () => {
         if (chromeApi && chromeApi.storage && chromeApi.storage.local) {
 
 
-            // Storageから単語帳情報を取得。なければwordCard/highlightsから生成
+            // Storageから単語帳情報を取得
             chromeApi.storage.local.get(
-                ['wordBook', 'wordCard', 'highlights'],
+                ['wordBook'],
                 (res: any) => {
 
                     console.log(
@@ -72,55 +72,6 @@ const WordBookList: React.FC = () => {
                     ) {
                         setWordBooks(res.wordBook);
                         return;
-                    }
-
-
-                    // wordCard または highlights から単語帳一覧を生成
-                    const sourceArray =
-                        (res &&
-                            Array.isArray(res.wordCard) &&
-                            res.wordCard.length > 0)
-                            ? res.wordCard
-                            : (res &&
-                                Array.isArray(res.highlights) &&
-                                res.highlights.length > 0)
-                                ? res.highlights
-                                : null;
-
-                    if (sourceArray?.length) {
-
-                        const map = new Map();
-
-                        sourceArray.forEach((c: any) => {
-                            if (!c.bookId) return;
-
-                            if (!map.has(c.bookId)) {
-                                map.set(c.bookId, {
-                                    id: c.bookId,
-                                    markerColor:
-                                        c.markerColor ??
-                                        '#FFEB3B',
-                                    markerLabel:
-                                        c.markerLabel ??
-                                        '未分類',
-                                });
-                            }
-                        });
-
-                        const derived = Array.from(map.values());
-
-                        if (derived.length > 0) {
-
-                            // 画面更新
-                            setWordBooks(derived);
-
-                            // 次回以降のため保存
-                            chromeApi.storage.local.set({
-                                wordBook: derived,
-                            });
-
-                            return;
-                        }
                     }
 
                 }
@@ -423,7 +374,7 @@ const WordBookList: React.FC = () => {
                                 newBook.markerColor
                         )
                     ) {
-                        toast.warning('同じ色の単語帳が既に存在します。色を変更してください。' );
+                        toast.warning('同じ色の単語帳が既に存在します。色を変更してください。');
                         handleCloseAddModal();
                         return;
                     }
@@ -446,7 +397,7 @@ const WordBookList: React.FC = () => {
                             // 画面状態更新
                             setWordBooks(next);
 
-                            toast.success('追加しました');
+                            toast.success('追加しました');      
 
                             // モーダル閉じる
                             handleCloseAddModal();
@@ -471,7 +422,7 @@ const WordBookList: React.FC = () => {
                         newBook.markerColor
                 )
             ) {
-                toast.warning('同じ色の単語帳が既に存在します。色を変更してください。' );
+                toast.warning('同じ色の単語帳が既に存在します。色を変更してください。');
                 return;
             }
 
@@ -500,7 +451,7 @@ const WordBookList: React.FC = () => {
                     handled = true;
 
                     // イベント解除
-                    window.removeEventListener('message',onMessage);
+                    window.removeEventListener('message', onMessage);
 
                     // 保存成功
                     if (
@@ -523,7 +474,7 @@ const WordBookList: React.FC = () => {
                     } else {
 
                         // 保存失敗
-                        console.warn('BookList: SAVE_EXTENSION_WORD_BOOKS_RESULT failed',d.error);
+                        console.warn('BookList: SAVE_EXTENSION_WORD_BOOKS_RESULT failed', d.error);
                     }
 
                     // モーダル閉じる
@@ -635,18 +586,27 @@ const WordBookList: React.FC = () => {
     // 単語帳削除処理
     // ======================================================
     const handleDelete = (id: string) => {
-        if (window.confirm("削除しますか？")) {
-            setWordBooks((currentBooks) => {
-                const next = currentBooks.filter((book) => book.id !== id);
-                toast.success('削除しました');
-                // 保存
-                const chromeApi = (window as any).chrome;
-                if (chromeApi && chromeApi.storage && chromeApi.storage.local) {
-                    chromeApi.storage.local.set({ wordBook: next });
-                }
-                return next;
-            });
-        }
+        if (!window.confirm('削除しますか？')) return;
+
+        setWordBooks((currentBooks) => {
+    const next = currentBooks.filter((book) => book.id !== id);
+
+    // content経由で保存
+    try {
+      window.postMessage(
+        { type: 'DELETE_WORD_BOOK', bookId: id },
+        '*'
+      );
+      console.log('DELETE_WORD_BOOK送信:', id);
+    } catch (e) {
+      console.error('DELETE_WORD_BOOK送信失敗:', e);
+    }
+
+    console.log('削除後:', next);
+
+    return next;
+  });
+
     };
 
 
