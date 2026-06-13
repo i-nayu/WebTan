@@ -378,7 +378,6 @@ const ReviewWords: React.FC = () => {
         console.log('ボタンがクリックされました');
 
         if (!trimmedApiKey) {
-            toast.error('APIキーを入力してください。');
             setIsSettingsOpen(true);
             return;
         }
@@ -501,6 +500,13 @@ const ReviewWords: React.FC = () => {
                             📝 選択した単語
                         </h1>
                     </div>
+                    <button
+              onClick={() =>
+                handleSaveApiKey()
+              }
+              >
+              <span>Gemini API設定</span>
+             </button>
 
                     {isSettingsOpen && (
                         <div
@@ -513,7 +519,7 @@ const ReviewWords: React.FC = () => {
                                     styles.settingsTitle
                                 }
                             >
-                                AI生成にはAPIキーが必要です
+                                Gemini APIを入力してください
                             </p>
 
                             <input
