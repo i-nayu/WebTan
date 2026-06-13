@@ -243,3 +243,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+// PDFマーカーを開くボタンの処理
+document.addEventListener('DOMContentLoaded', () => {
+  const openPdfBtn = document.getElementById('open-pdf-viewer');
+  if (openPdfBtn) {
+    openPdfBtn.addEventListener('click', () => {
+      // 拡張機能内の pdf-viewer.html を新しいタブで開く
+      chrome.tabs.create({ url: chrome.runtime.getURL('pdf-viewer.html') });
+    });
+  }
+});
