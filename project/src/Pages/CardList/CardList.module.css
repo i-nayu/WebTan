@@ -1,0 +1,545 @@
+/* ミント */
+/* CardList styles */
+.container {
+    min-height: 100vh;
+    padding: 24px;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 32%),
+        radial-gradient(circle at top right, rgba(255, 152, 0, 0.12), transparent 30%),
+        linear-gradient(180deg, #f8fbff 0%, #f4f7fb 100%);
+    color: #1f2937;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.4);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 9999;
+}
+
+.settingsPanel {
+  width: 500px;
+  padding: 20px;
+  background: white;
+  border-radius: 10px;
+}
+
+.settingsTitle {
+  margin: 0 0 10px;
+  color: #1e3a8a;
+  font-weight: 700;
+}
+
+.apiKeyInput {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 0 12px;
+  font: inherit;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+
+.apiKeyInput:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.settingsActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+
+.title { font-size: clamp(1.6rem, 2.2vw, 2.2rem); margin: 0; font-weight: 800; }
+
+.headerButtons { 
+    display: flex; 
+    gap: 12px; 
+    align-items: flex-end; 
+    flex-wrap: wrap; 
+}
+
+.filterGroup {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.filterLabel {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #6b7280;
+    margin-left: 4px;
+    margin-bottom: 6px;
+    line-height: 1;
+}
+
+/* =========================================
+   共通ボタン設定
+========================================= */
+button {
+    cursor: pointer;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    transition: transform 0.1s ease, filter 0.1s ease, opacity 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    font-size: 0.95rem;
+}
+
+button:active {
+    transform: scale(0.97);
+}
+
+button:hover {
+    filter: brightness(0.95);
+}
+
+/* =========================================
+   個別のボタンデザイン
+========================================= */
+.addButton {
+    background: linear-gradient(135deg, #111827, #374151);
+    color: #fff;
+}
+
+.shuffleButton {
+    background: #fef9c3;
+    color: #854d0e;
+    border: 1px solid #fde047;
+}
+
+.modeButton {
+    background: #e0f7fa;
+    color: #000000;
+    border: 1px solid #b2ebf2;
+}
+
+.deleteArea {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+    width: 100%;
+}
+
+/* 削除ボタン自体の調整 */
+.deleteButton {
+    background: #fee2e2;
+    color: #b91c1c;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px; /* 丸みをお好みで */
+    cursor: pointer;
+    width: auto !important; /* スマホ用CSSで width: 100% に引っ張られるのを防ぐ */
+}
+
+.primaryButton {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #fff;
+    padding: 10px 24px;
+}
+
+.secondaryButton {
+    background: #e5e7eb;
+    color: #374151;
+    padding: 10px 24px;
+}
+
+/* =========================================
+   フィルターボタン
+========================================= */
+.filterButton {
+    border: none;
+    border-radius: 999px;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 8px 14px;
+    cursor: pointer;
+    color: #40444b;
+    transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.filterButtons { 
+    display: flex; 
+    gap: 8px; 
+    align-items: center;
+}
+
+/* =========================================
+   その他修正点
+========================================= */
+.arrowButton {
+    background: transparent !important;
+    border: none;
+    color: #6b7280;
+    padding: 4px 12px;
+}
+
+/* =========================================
+   フィルターボタン関連のスタイル（新規追加）
+========================================= */
+.filterButtons { 
+    display: flex; 
+    gap: 8px; 
+	align-items: center;
+}
+
+.filterAll { background-color: #22c55e; color: #fff; }
+.filterLearned { background-color: #3b82f6; color: #fff; }
+.filterUnlearned { background-color: #4f46e5; color: #fff; }
+/* ========================================= */
+
+.formCard {
+    max-width: 960px;
+    margin: 0 0 16px;
+    padding: 18px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(31, 41, 55, 0.08);
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
+    backdrop-filter: blur(10px);
+}
+
+.formTitle { margin: 0 0 14px; font-size: 1.05rem; font-weight: 700; }
+
+.field { display: block; margin-bottom: 14px; }
+
+.fieldLabel {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #374151;
+}
+
+.textArea {
+    width: 100%;
+    min-height: 96px;
+    padding: 12px 14px;
+    border: 1px solid #d7dce3;
+    border-radius: 14px;
+    background: #fff;
+    font: inherit;
+    color: inherit;
+    resize: vertical;
+    outline: none;
+}
+
+.textArea:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.formButtons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.secondaryButton,
+.primaryButton,
+.addButton,
+.shuffleButton,
+.deleteButton,
+
+/* 問題テキストは左寄せ */
+.questionText {
+    text-align: left;
+    flex: 1;
+}
+
+/* 問題エリアは左寄せ */
+.questionArea {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    gap: 12px; /* 問題文と矢印の間隔 */
+}
+
+/* =========================================
+   テストモード専用スタイル
+========================================= */
+/* 1枚の大きな白い紙（問題全体の枠） */
+.testModeList {
+    background: #ffffff; /* 完全な白背景 */
+    padding: 40px; /* 紙のフチの余白を大きくとる */
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05); /* うっすら影をつけて紙っぽく */
+    
+    display: flex;
+    flex-direction: column;
+    gap: 32px; /* 問題ごとに改行（広い隙間）を作る */
+}
+
+/* 個別の問題要素 */
+.testModeCard {
+    background: transparent;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    /* 問題と問題の間にうっすら区切り線を入れる */
+    border-bottom: 1px dashed #e5e7eb;
+    padding-bottom: 8px;
+}
+
+/* 一番最後の問題の下には区切り線を引かない */
+.testModeCard:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+/* ─── ここから解答エリア用のスタイル ─── */
+/* 解答全体を囲む白い紙の背景 */
+.answerList {
+    background: #ffffff;
+    padding: 32px 40px; /* 内側のゆとり */
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05); /* 紙のような影 */
+    margin-top: 32px; /* 問題エリアとの間隔 */
+    text-align: left; /* ★文字をすべて左寄せにする */
+}
+
+/* 解答表示切り替えボタン（ボタンだけは中央に配置） */
+.showAnswersButton {
+    display: block;
+    margin: 0 auto 24px auto; /* 左右の余白をautoにして中央寄せ */
+    background: #f3f4f6;
+    color: #374151;
+    padding: 10px 24px;
+    border: none;
+    border-radius: 999px; /* 丸っこいボタン */
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.1s ease, filter 0.1s ease;
+}
+
+.showAnswersButton:hover {
+    filter: brightness(0.95);
+    transform: scale(0.98);
+}
+
+/* 「解答一覧」という見出しのデザイン */
+.answerList h2 {
+    margin: 0 0 16px 0;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #f3f4f6; /* 見出しの下に区切り線 */
+    font-size: 1.25rem;
+    color: #1f2937;
+}
+
+/* 各解答テキストのゆとり */
+.answerItem {
+    padding: 6px 0;
+    font-size: 1rem;
+    color: #374151;
+}
+
+/* 矢印ボタンの余分なパディングを削除 */
+.arrowButton {
+    background: none;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 4px;
+    color: #6b7280;    
+    /* 追加：ボタン自体の幅を固定して中央寄せ */
+    width: 24px;            /* ボタン自体の幅を固定 */
+    display: flex;          
+    justify-content: center; /* 幅の中で記号を左右中央寄せ */
+}
+
+.arrowButton:hover {
+    color: #111827;
+}
+
+.secondaryButton,
+.primaryButton,
+.addButton,
+.shuffleButton,
+.deleteButton {
+    font-weight: 700;
+}
+
+.secondaryButton,
+.primaryButton {
+    min-height: 44px;
+    padding: 0 18px;
+}
+
+.secondaryButton {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.primaryButton {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #fff;
+    box-shadow: 0 12px 24px rgba(37, 99, 235, 0.22);
+}
+
+.addButton,
+.shuffleButton,
+.deleteButton {
+    padding: 8px 14px;
+    border: 1px solid #d7dce3;
+}
+
+.addButton {
+    background: #ef4444;    /* 赤 */
+    color: #fff;
+    border: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.shuffleButton {
+    background: #f97316;    /* 橙 */
+    color: #fff;
+    border: none;
+}
+
+.secondaryButton:hover,
+.primaryButton:hover,
+.addButton:hover,
+.shuffleButton:hover,
+.deleteButton:hover,
+.questionButton:hover {
+    transform: translateY(-1px);
+}
+
+.cardList { display: grid; gap: 12px; }
+
+.card {
+    background: rgba(255, 255, 255, 0.96);
+    padding: 12px 16px;
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    border: 1px solid rgba(31, 41, 55, 0.06);
+}
+
+.cardTop { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.questionButton { background: none; border: none; text-align: left; font-size: 1rem; cursor: pointer; font-weight: 700; flex: 1; min-width: 180px; }
+
+.answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 220ms ease-in-out, opacity 200ms ease-in-out;
+    opacity: 0;
+    padding-top: 0;
+    
+    /* 追加：縦並びのFlexboxにする */
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* 答えのテキストと削除ボタンの間の余白 */
+}
+
+.answerOpen {
+    max-height: 800px; /* ボタンがはみ出さないよう少し大きめに確保 */
+    opacity: 1;
+    padding-top: 12px;
+}
+
+.checkboxArea { margin-right: 8px; }
+.modeWrapper {
+    position: relative;
+	display: inline-block;
+}
+
+.modeMenu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    min-width: 160px;
+
+    background: white;
+    border: 1px solid #d7dce3;
+    border-radius: 10px;
+
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+
+    z-index: 1000;
+}
+
+.modeMenu button {
+    border: none;
+    background: white;
+    padding: 10px 25px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.modeMenu button:hover {
+    background: #f3f4f6;
+}
+
+.activeMode {
+    background: #cbd9ec !important;
+    font-weight: 700;
+}
+
+.modeButton {
+    padding: 8px 14px;
+    font-size: 1rem;
+    font-weight: 700;
+    min-height: 44px;
+    background: #facc15;
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+/* 7. AI生成：紫 */
+.reconstruct {
+    background: #9333ea;
+    color: #fff;
+    border: none;
+}
+
+@media (max-width: 640px) {
+    .container { padding: 18px 14px 28px; }
+
+    .header { flex-direction: column; align-items: flex-start; gap: 12px; }
+
+    .headerButtons { width: 100%; flex-direction: column; align-items: stretch; }
+
+    .addButton,
+    .shuffleButton,
+    .deleteButton,
+    .questionButton,
+    .secondaryButton,
+    .primaryButton,
+    .filterButton {  /* スマホ版で横幅いっぱいになるよう追加 */
+        width: 100%;
+    }
+
+    .formButtons { flex-direction: column; }
+}
