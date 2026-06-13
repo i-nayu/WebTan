@@ -1,0 +1,131 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  background-color: #525659;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ツールバーの装飾 */
+.toolbar {
+  background-color: #323639;
+  color: white;
+  padding: 10px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  z-index: 100;
+}
+
+.file-name {
+  margin-left: 10px;
+  font-size: 14px;
+  color: #ccc;
+}
+
+/* ★変更: 追加したフォーム要素がきれいに並ぶように調整 */
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+select, input[type="text"] {
+  padding: 6px;
+  border: 1px solid #555;
+  border-radius: 4px;
+  background-color: #fff;
+  font-size: 13px;
+  color: #333;
+}
+
+input[type="text"] {
+  width: 100px; /* 入力欄が長すぎないように固定 */
+}
+
+input[type="color"] {
+  cursor: pointer;
+  border: 1px solid #555;
+  border-radius: 4px;
+  width: 32px;
+  height: 32px;
+  padding: 2px;
+  background-color: #fff;
+}
+
+button {
+  cursor: pointer;
+  padding: 8px 16px;
+  background-color: #1a73e8;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  transition: background-color 0.2s;
+  margin-left: 4px;
+}
+
+button:hover:not(:disabled) {
+  background-color: #1557b0;
+}
+
+button:disabled {
+  background-color: #555;
+  color: #888;
+  cursor: not-allowed;
+}
+
+/* PDF表示領域 */
+#viewer-container {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0;
+}
+
+/* ページごとのラッパー */
+.pdf-page-wrapper {
+  position: relative;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  background-color: white;
+}
+
+/* テキストレイヤー */
+.textLayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  line-height: 1;
+}
+
+.textLayer ::selection {
+  background: rgba(0, 120, 255, 0.3);
+}
+
+/* ハイライト用の要素 */
+.custom-highlight {
+  position: absolute;
+  mix-blend-mode: multiply;
+  pointer-events: auto;
+  cursor: pointer;
+  z-index: 5;
+  transition: opacity 0.2s, outline 0.2s;
+  border-radius: 2px;
+}
+
+.custom-highlight:hover {
+  opacity: 0.8 !important;
+  outline: 2px solid rgba(255, 82, 82, 0.8);
+  box-sizing: border-box;
+}
