@@ -501,6 +501,7 @@ const ReviewWords: React.FC = () => {
                         </h1>
                     </div>
                     <button
+                    className={styles.settingsBtn}
               onClick={() =>
                 handleSaveApiKey()
               }
@@ -542,7 +543,7 @@ const ReviewWords: React.FC = () => {
                             >
                                 <button
                                     className={
-                                        styles.resetBtn
+                                        styles.closeButton
                                     }
                                     onClick={() =>
                                         setIsSettingsOpen(

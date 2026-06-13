@@ -103,8 +103,8 @@
 }
 
 .textInput:focus {
-	border-color: #ff9800;
-	box-shadow: 0 0 0 4px rgba(255, 152, 0, 0.16);
+	border-color: var(--accent-color);
+	box-shadow: 0 0 0 4px var(--accent-shadow);
 }
 
 .colorInputRow {
@@ -168,7 +168,7 @@
 }
 
 .primaryButton {
-	background: linear-gradient(135deg, #ff9800, #ff7043);
+    background: var(--accent-color);
 	color: #fff;
 	box-shadow: 0 12px 24px rgba(255, 152, 0, 0.28);
 }
