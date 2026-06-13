@@ -61,9 +61,21 @@ const CardList: React.FC = () => {
     const [showModeMenu, setShowModeMenu] = useState(false);
     const [showAnswers, setShowAnswers] = useState(false);
     const [showAIMenu, setShowAIMenu] = useState(false);
+    const [printGap, setPrintGap] = useState(16); 
 
     const [questionSentence, setQuestionSentence] = useState('');
     const [answerObj, setAnswerObj] = useState<Record<string, string>>({});
+
+    const [printTarget, setPrintTarget] = useState<'questions' | 'answers' | null>(null);
+
+    const handlePrint = (target: 'questions' | 'answers') => {
+        setPrintTarget(target);
+        // 少しだけ待ってから印刷画面を開く（CSSを適用させるため）
+        setTimeout(() => {
+            window.print();
+            setPrintTarget(null); // 印刷が終わったら元に戻す
+        }, 100);
+    };
 
     useEffect(() => {
         const chromeApi = (window as any).chrome;
@@ -646,12 +658,11 @@ const CardList: React.FC = () => {
         }
     };
 
-
     // ======================================================
     // 画面レイアウト
     // ======================================================
     return (
-        <div className={styles.container}>
+        <div className={`${styles.container} ${printTarget === 'questions' ? styles.printQuestions : ''} ${printTarget === 'answers' ? styles.printAnswers : ''}`}>
 
             {/* ヘッダー */}
             <div className={styles.header}>
@@ -728,13 +739,14 @@ const CardList: React.FC = () => {
                     <button className={styles.shuffleButton} onClick={handleShuffle}>
                         シャッフル
                     </button>
-                    <button className={styles.modeButton} onClick={() => setShowModeMenu(!showModeMenu)}>
-                        モード変更
-                    </button>
+          
+          {/* 💡 「モード変更」のボタンを modeWrapper の「中」に入れました！ */}
+          <div className={styles.modeWrapper}>
+            <button className={styles.modeButton} onClick={() => setShowModeMenu(!showModeMenu)}>
+              モード変更
+            </button>
 
-                    <div className={styles.modeWrapper}>
-
-                        {showModeMenu && (
+            {showModeMenu && (
                             <div className={styles.modeMenu}>
                                 <button className={mode === 'card' ? styles.activeMode : ''} onClick={() => {
                                     setMode('card');
@@ -878,9 +890,40 @@ const CardList: React.FC = () => {
                 </div>
             )}
 
-            <div className={styles.cardList}>
+            {/* テストモード用の印刷コントロールと見出し */}
+            {mode === 'test' && (
+                <>
+                    <div className={styles.printControls}>
+                        <label className={styles.gapSetting}>
+                            改行の広さ: {printGap}px
+                            <input
+                                type="range"
+                                min="0"
+                                max="100"
+                                value={printGap}
+                                onChange={(e) => setPrintGap(Number(e.target.value))}
+                            />
+                        </label>
+                        <button className={styles.printButton} onClick={() => handlePrint('questions')}>
+                            🖨️ 問題のみ印刷
+                        </button>
+                    </div>
+                    <h2 className={styles.testModeTitle}>問題一覧</h2>
+                </>
+            )}
+
+            
+            {/* 💡 テストモードの時は、スライダーで設定した隙間(printGap)を適用します */}
+            <div
+                className={mode === 'test' ? styles.testModeList : styles.cardList}
+                style={mode === 'test' ? { gap: `${printGap}px` } : undefined}
+            >
                 {filteredCards.map((card, index) => (
-                    <div key={card.id} className={styles.card}>
+                    <div
+                        key={card.id}
+                        className={mode === 'test' ? styles.testModeCard : styles.card}
+                        style={mode === 'test' ? { paddingBottom: `${printGap / 2}px` } : undefined}
+                    >
                         <div className={styles.cardTop}>
                             <label className={styles.checkboxArea}>
                                 <input type="checkbox" checked={card.learned} onChange={() => toggleCheck(card.id)} />
@@ -961,9 +1004,15 @@ const CardList: React.FC = () => {
                         {showAnswers ? '解答を隠す' : '解答一覧を表示'}
                     </button>
 
-                    {showAnswers && (
+                    {(showAnswers || printTarget === 'answers') && (
                         <>
-                            <h2>解答一覧</h2>
+                            {/* 💡 見出しと印刷ボタンを横並びにするためのdivを追加しました */}
+                            <div className={styles.answerHeader}>
+                                <h2>解答一覧</h2>
+                                <button className={styles.printButton} onClick={() => handlePrint('answers')}>
+                                    🖨️ 解答のみ印刷
+                                </button>
+                            </div>
 
                             {filteredCards.map((card, index) => (
                                 <div
@@ -975,7 +1024,7 @@ const CardList: React.FC = () => {
                             ))}
                             {Object.entries(answerObj).map(
                                 ([key, value]) => (
-                                    <div key={key}>
+                                    <div key={key} className={styles.answerItem}>
                                         {key}: {value}
                                     </div>
                                 )

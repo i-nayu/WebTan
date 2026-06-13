@@ -1,4 +1,3 @@
-/* ミント */
 /* CardList styles */
 .container {
     min-height: 100vh;
@@ -10,6 +9,9 @@
         linear-gradient(180deg, #f8fbff 0%, #f4f7fb 100%);
     color: #1f2937;
 }
+
+.printQuestions {}
+.printAnswers {}
 
 .header {
     display: flex;
@@ -235,7 +237,7 @@ button:hover {
 }
 
 .textArea {
-    width: 100%;
+    width: 90%;
     min-height: 96px;
     padding: 12px 14px;
     border: 1px solid #d7dce3;
@@ -542,4 +544,80 @@ button:hover {
     }
 
     .formButtons { flex-direction: column; }
+}
+
+/* ==========================
+   印刷専用
+========================== */
+@media print {
+
+  .header,
+  .printControls,
+  .showAnswersButton,
+  .printButton {
+    display: none !important;
+  }
+
+  .printQuestions .answerList {
+    display: none !important;
+  }
+
+  .checkboxArea {
+    display: none !important;
+  }
+
+  .printAnswers .testModeList,
+  .printAnswers .testModeTitle {
+    display: none !important;
+  }
+
+  /* 印刷用レイアウト */
+  .container {
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .testModeList,
+  .answerList {
+    background: white !important;
+    box-shadow: none !important;
+    border: none !important;      /* ←追加 */
+    outline: none !important;     /* ←追加 */
+    border-radius: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* 各問題・解答の枠線を消す */
+  .testModeCard,
+  .answerItem {
+    border: none !important;      /* ←追加 */
+    outline: none !important;     /* ←追加 */
+    box-shadow: none !important;  /* ←追加 */
+    background: transparent !important;
+  }
+
+  /* すべての点線・区切り線を消す */
+  .testModeCard::before,
+  .testModeCard::after,
+  .answerItem::before,
+  .answerItem::after {
+    display: none !important;
+    border: none !important;
+  }
+
+  hr {
+    display: none !important;
+  }
+
+  * {
+    border-style: none !important;
+  }
+
+  .testModeCard,
+  .answerItem {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
 }
