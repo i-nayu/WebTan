@@ -11,6 +11,34 @@ document.addEventListener('DOMContentLoaded', () => {
   const normalizeColor = (color) => String(color || '').trim().toLowerCase();
   const normalizeLabel = (label) => String(label || '').trim().toLowerCase();
 
+  const colorToHex = (color) => {
+    const normalized = String(color || '').trim();
+    if (!normalized) return '#ffff00';
+    if (/^#[0-9a-f]{6}$/i.test(normalized)) {
+      return normalized.toLowerCase();
+    }
+
+    const rgbMatch = normalized.match(/^rgba?\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+    if (rgbMatch) {
+      const toHex = (value) => Number(value).toString(16).padStart(2, '0');
+      return `#${toHex(rgbMatch[1])}${toHex(rgbMatch[2])}${toHex(rgbMatch[3])}`;
+    }
+
+    const probe = document.createElement('div');
+    probe.style.color = normalized;
+    document.body.appendChild(probe);
+    const computed = getComputedStyle(probe).color;
+    probe.remove();
+
+    const computedMatch = computed.match(/^rgb\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)\)/i);
+    if (computedMatch) {
+      const toHex = (value) => Number(value).toString(16).padStart(2, '0');
+      return `#${toHex(computedMatch[1])}${toHex(computedMatch[2])}${toHex(computedMatch[3])}`;
+    }
+
+    return '#ffff00';
+  };
+
   const createBookId = () => {
     return globalThis.crypto?.randomUUID?.() ?? `book-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
   };
@@ -47,7 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const syncLabelByColor = (color) => {
-    const target = normalizeColor(color);
+    const hexColor = colorToHex(color);
+    const target = normalizeColor(hexColor);
     getWordBooks((sets) => {
       const matched = sets.find((s) => normalizeColor(s.markerColor) === target);
       const label = matched?.markerLabel || '未登録の色';
@@ -56,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       markerLabelPreview.textContent = `ラベル: ${label}`;
       chrome.storage.local.set({
-        markerColor: color,
+        markerColor: hexColor,
         markerLabel: matched?.markerLabel || '',
         bookId: matched?.bookId || matched?.id || '',
       });
@@ -78,13 +107,15 @@ document.addEventListener('DOMContentLoaded', () => {
   if (markerColorInput) {
     chrome.storage.local.get(['markerColor'], (res) => {
       if (res && res.markerColor) {
-        markerColorInput.value = res.markerColor;
-        syncLabelByColor(res.markerColor);
+        const hexColor = colorToHex(res.markerColor);
+        markerColorInput.value = hexColor;
+        syncLabelByColor(hexColor);
       }
     });
 
     markerColorInput.addEventListener('change', () => {
-      const color = markerColorInput.value || '#FFFF00';
+      const color = colorToHex(markerColorInput.value || '#FFFF00');
+      markerColorInput.value = color;
       syncLabelByColor(color);
       // notify active tab so UI can update immediately
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -182,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const choose = document.createElement('button');
       choose.textContent = '選択';
       choose.addEventListener('click', () => {
-        const color = s.markerColor || '#FFFF00';
+        const color = colorToHex(s.markerColor || '#FFFF00');
         const label = s.markerLabel || '';
         const bookId = s.bookId || s.id || '';
         if (markerColorInput) markerColorInput.value = color;
@@ -219,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
     addSetBtn.addEventListener('click', () => {
       const label = (newLabelInput && newLabelInput.value && newLabelInput.value.trim()) ? newLabelInput.value.trim() : null;
       if (!label) return;
-      const color = (document.getElementById('markerColor') && document.getElementById('markerColor').value) ? document.getElementById('markerColor').value : '#FFFF00';
+      const color = colorToHex((document.getElementById('markerColor') && document.getElementById('markerColor').value) ? document.getElementById('markerColor').value : '#FFFF00');
       const enteredBookId = (newBookIdInput && newBookIdInput.value && newBookIdInput.value.trim()) ? newBookIdInput.value.trim() : '';
       const id = enteredBookId || createBookId();
       chrome.storage.local.get(['wordBook'], (res) => {
