@@ -743,7 +743,6 @@ const CardList: React.FC = () => {
                 </span>
               ) : (
                 <span>
-                  ✨
                   AI生成
                 </span>
               )}
@@ -789,20 +788,18 @@ const CardList: React.FC = () => {
         </div>
       )}
 
-      <div className={styles.cardList}>
+      <div className={mode === 'test' ? styles.testModeList : styles.cardList}>
+        {mode === 'test' && (
+          <h2 className={styles.testModeTitle}>問題一覧</h2>
+        )}
         {filteredCards.map((card, index) => (
-          <div key={card.id} className={styles.card}>
+          <div key={card.id} className={mode === 'test' ? styles.testModeCard : styles.card}>
+            {/* ── 問題文エリア（cardTop） ── */}
             <div className={styles.cardTop}>
               <label className={styles.checkboxArea}>
-                <input
-                  type="checkbox"
-                  checked={card.learned}
-                  onChange={() => toggleCheck(card.id)}
-                />
+                <input type="checkbox" checked={card.learned} onChange={() => toggleCheck(card.id)} />
               </label>
 
-
-              {/* 問題ボタン */}
               <div className={styles.questionArea}>
                 <div className={styles.questionText} onClick={() => mode === 'card' && handleToggle(card.id)}>
                   {mode === 'test' ? `(${index + 1}) ` : ''}
@@ -813,17 +810,12 @@ const CardList: React.FC = () => {
                     {openedIds.includes(card.id) ? '▲' : '▼'}
                   </button>
                 )}
-
               </div>
-              {/* 削除ボタン */}
-              {mode === 'edit' && (
-                <button className={styles.deleteButton} onClick={() => handleDelete(card.id)}>
-                  削除
-                </button>
-              )}
+              
+              {/* 💡 ここにあった削除ボタンを削除しました */}
             </div>
 
-            {/* 答え表示エリア */}
+            {/* ── 答え表示エリア ── */}
             {(mode === 'card' || mode === 'edit') && (
               <div
                 className={`${styles.answer} ${mode === 'edit' || openedIds.includes(card.id)
@@ -831,10 +823,19 @@ const CardList: React.FC = () => {
                   : ''
                   }`}
               >
-                {card.answer}
+                {/* 💡 1. 答えのテキストを <div> で囲んで独立させます */}
+                <div>{card.answer}</div>
+
+                {/* 💡 2. 削除ボタンをここに移動し、deleteAreaで囲みます */}
+                {mode === 'edit' && (
+                  <div className={styles.deleteArea}>
+                    <button className={styles.deleteButton} onClick={() => handleDelete(card.id)}>
+                      削除
+                    </button>
+                  </div>
+                )}
               </div>
             )}
-
           </div>
         ))}
         {mode === 'card' && (
