@@ -11,8 +11,24 @@
 }
 
 .header {
-	max-width: 960px;
-	margin: 0 auto 24px;
+  position: relative; /* 子要素の絶対配置の基準にする */
+  display: flex;
+  align-items: center;
+  justify-content: center; /* 基本的に中央に寄せる */
+  min-height: 60px; /* 必要に応じて高さを確保 */
+}
+
+.reviewButton {
+  position: absolute; /* ヘッダー全体の流れから浮かせる */
+  left: 16px;        /* 左端から少し余白をあける */
+  background-color: #22536d;
+  color: white;
+}
+
+.title {
+  font-size: 24px;   /* サイズはお好みで */
+  margin: 0;
+  text-align: center;
 }
 
 .title {

@@ -619,6 +619,9 @@ const WordBookList: React.FC = () => {
         <div className={styles.container}>
             {/* ヘッダー */}
             <div className={styles.header}>
+                <button onClick={() => navigate('/review')} className={styles.reviewButton}>
+                    受信した単語を見る
+                </button>
                 {/* タイトル */}
                 <h1 className={styles.title}>
                     単語帳一覧
