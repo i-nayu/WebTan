@@ -583,6 +583,69 @@ const CardList: React.FC = () => {
     };
   };
 
+  const handleGenerateAnswerByAI = async () => {
+    setGeneratingId('new-card');
+    
+          const usableApiKey = await getApiKey();
+  
+          if (!usableApiKey) { //APIがない時は入力画面を開く
+              toast.error('AI生成にはAPIキーが必要です。設定画面でAPIキーを入力してください。'  );
+              setIsSettingsOpen(true);
+              return;
+          }
+  
+  
+          const question = newQuestion.trim();
+  
+          try {
+              const prompt =
+                  `以下の問題に対して、単語帳の「答え」として使える簡潔な説明を日本語で出力してください。問題: ${question}`;
+  
+              const genAI = new GoogleGenerativeAI(
+                  usableApiKey
+              );
+  
+              const model = genAI.getGenerativeModel({
+                  model: 'gemini-2.5-flash',
+              });
+  
+              const result = await model.generateContent({
+                  contents: [
+                      {
+                          role: 'user',
+                          parts: [
+                              {
+                                  text: prompt,
+                              },
+                          ],
+                      },
+                  ],
+              });
+  
+              const responseText = result.response.text().trim();
+  
+              if (!responseText) {
+                  throw new Error(
+                      'AIの応答が空でした。'
+                  );
+              }
+              
+              setNewAnswer(responseText);
+
+    toast.success('答えを生成しました');
+
+          } catch (error: any) {
+              console.error(error);
+  
+              const em =
+                  error?.message ?? String(error);
+  
+              toast.error(`AI生成に失敗しました: ${em}`);
+          } finally {
+              setGeneratingId(null);
+          }
+      };
+
 
   // ======================================================
   // 画面レイアウト
@@ -769,7 +832,19 @@ const CardList: React.FC = () => {
           </label>
 
           <label className={styles.field}>
+            <div className={styles.aiRow}>
+  <button
+    type="button"
+    onClick={() => handleGenerateAnswerByAI()}
+    disabled={generatingId === 'new-card'}
+  >
+    {generatingId === 'new-card'
+      ? '生成中...'
+      : '✨AIで答え生成'}
+  </button>
+</div>
             <span className={styles.fieldLabel}>答え</span>
+           
             <textarea
               className={styles.textArea}
               value={newAnswer}
