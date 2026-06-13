@@ -7,6 +7,10 @@
     "activeTab",
     "scripting"
   ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "WebTan"
+  },
   "background": {
     "service_worker": "background.js"
   },
