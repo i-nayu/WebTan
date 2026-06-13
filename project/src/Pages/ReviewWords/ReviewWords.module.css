@@ -48,9 +48,26 @@
   font-weight: bold;
   cursor: pointer;
   transition: opacity 0.2s;
+  width: 50%;
 }
 
 .saveButton:hover {
+  opacity: 0.8;
+} 
+
+.closeButton {
+  background: #37474f; 
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  width: 50%;
+}
+
+.closeButton:hover {
   opacity: 0.8;
 }
 
@@ -66,6 +83,47 @@
   margin: 0 0 10px;
   color: #1e3a8a;
   font-weight: 700;
+}
+
+.settingsBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 140px;
+    margin: 0 auto;
+
+    border: 1px solid #dcdcdc;
+    border-radius: 10px;
+
+    background: #4285f4;
+    color: white;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.settingsBtn:hover {
+    background: #f8f9fa;
+    border-color: #4285f4;
+    color: #4285f4;
+}
+
+.settingsBtn:active {
+    transform: scale(0.98);
+}
+
+.settingsBtn:focus-visible {
+    outline: none;
+    border-color: #4285f4;
+    box-shadow: 0 0 0 4px rgba(66, 133, 244, 0.15);
+}
+
+.settingsBtn span {
+    pointer-events: none;
 }
 
 .apiKeyInput {
@@ -87,7 +145,8 @@
 
 .settingsActions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
+  width: 100%;
   gap: 10px;
 }
 

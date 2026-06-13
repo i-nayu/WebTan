@@ -397,7 +397,7 @@ const WordBookList: React.FC = () => {
                             // 画面状態更新
                             setWordBooks(next);
 
-                            toast.success('追加しました');      
+                            toast.success('追加しました');
 
                             // モーダル閉じる
                             handleCloseAddModal();
@@ -589,23 +589,23 @@ const WordBookList: React.FC = () => {
         if (!window.confirm('削除しますか？')) return;
 
         setWordBooks((currentBooks) => {
-    const next = currentBooks.filter((book) => book.id !== id);
+            const next = currentBooks.filter((book) => book.id !== id);
 
-    // content経由で保存
-    try {
-      window.postMessage(
-        { type: 'DELETE_WORD_BOOK', bookId: id },
-        '*'
-      );
-      console.log('DELETE_WORD_BOOK送信:', id);
-    } catch (e) {
-      console.error('DELETE_WORD_BOOK送信失敗:', e);
-    }
+            // content経由で保存
+            try {
+                window.postMessage(
+                    { type: 'DELETE_WORD_BOOK', bookId: id },
+                    '*'
+                );
+                console.log('DELETE_WORD_BOOK送信:', id);
+            } catch (e) {
+                console.error('DELETE_WORD_BOOK送信失敗:', e);
+            }
 
-    console.log('削除後:', next);
+            console.log('削除後:', next);
 
-    return next;
-  });
+            return next;
+        });
 
     };
 
@@ -646,45 +646,56 @@ const WordBookList: React.FC = () => {
                             </button>
                         </div>
 
-                        <label className={styles.field}>
-                            <span className={styles.fieldLabel}>単語帳名</span>
-                            <input
-                                className={styles.textInput}
-                                type="text"
-                                value={newBookName}
-                                placeholder="例: 世界史"
-                                onChange={(event) => setNewBookName(event.target.value)}
-                                autoFocus
-                            />
-                        </label>
+                        <div
+                            style={
+                                {
+                                    '--accent-color': newBookColor,
+                                    '--accent-shadow': `${newBookColor}29`,
+                                } as React.CSSProperties
+                            }
+                        >
 
-                        <label className={styles.field}>
-                            <span className={styles.fieldLabel}>マーカー色</span>
-                            <div className={styles.colorInputRow}>
+                            <label className={styles.field}>
+                                <span className={styles.fieldLabel}>単語帳名</span>
                                 <input
-                                    className={styles.colorInput}
-                                    type="color"
-                                    value={newBookColor}
-                                    onChange={(event) => setNewBookColor(event.target.value)}
+                                    className={styles.textInput}
+                                    type="text"
+                                    value={newBookName}
+                                    placeholder="例: 世界史"
+                                    onChange={(event) => setNewBookName(event.target.value)}
+                                    autoFocus
                                 />
-                                <span className={styles.colorCode}>{newBookColor}</span>
-                            </div>
-                        </label>
+                            </label>
 
-                        <div className={styles.formButtons}>
-                            <button
-                                className={styles.secondaryButton}
-                                onClick={handleCloseAddModal}
-                            >
-                                キャンセル
-                            </button>
-                            <button
-                                className={styles.primaryButton}
-                                onClick={handleAddBook}
-                            >
-                                追加する
-                            </button>
+                            <label className={styles.field}>
+                                <span className={styles.fieldLabel}>マーカー色</span>
+                                <div className={styles.colorInputRow}>
+                                    <input
+                                        className={styles.colorInput}
+                                        type="color"
+                                        value={newBookColor}
+                                        onChange={(event) => setNewBookColor(event.target.value)}
+                                    />
+                                    <span className={styles.colorCode}>{newBookColor}</span>
+                                </div>
+                            </label>
+
+                            <div className={styles.formButtons}>
+                                <button
+                                    className={styles.secondaryButton}
+                                    onClick={handleCloseAddModal}
+                                >
+                                    キャンセル
+                                </button>
+                                <button
+                                    className={styles.primaryButton}
+                                    onClick={handleAddBook}
+                                >
+                                    追加する
+                                </button>
+                            </div>
                         </div>
+
                     </div>
                 </div>
             )}
