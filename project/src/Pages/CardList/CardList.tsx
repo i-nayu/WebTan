@@ -646,303 +646,239 @@ const CardList: React.FC = () => {
     };
 
 
-    // ======================================================
-    // 画面レイアウト
-    // ======================================================
-    return (
-        <div className={styles.container}>
+              <div
+                className={
+                  styles.settingsActions
+                }
+              >
+                <button
+                  className={
+                    styles.resetBtn
+                  }
+                  onClick={() =>
+                    setIsSettingsOpen(
+                      false
+                    )
+                  }
+                >
+                  閉じる
+                </button>
 
-            {/* ヘッダー */}
-            <div className={styles.header}>
-                {isSettingsOpen && (
-                    <div className={styles.overlay}>
-                        <div
-                            className={
-                                styles.settingsPanel
-                            }
-                        >
-                            <p
-                                className={
-                                    styles.settingsTitle
-                                }
-                            >
-                                Gemini APIを入力してください
-                            </p>
+                <button
+                  className={
+                    styles.saveButton
+                  }
+                  onClick={
+                    handleSaveApiKey
+                  }
+                >
+                  保存
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
-                            <input
-                                className={
-                                    styles.apiKeyInput
-                                }
-                                type="password"
-                                value={apiKey}
-                                onChange={(e) =>
-                                    setApiKey(
-                                        e.target.value
-                                    )
-                                }
-                            />
+        {/* 単語帳タイトル */}
+        <h1 className={styles.title}>
+          {book?.markerLabel ? `${book.markerLabel}` : `単語帳 ${id}`}
+        </h1>
 
-                            <div
-                                className={
-                                    styles.settingsActions
-                                }
-                            >
-                                <button
-                                    className={
-                                        styles.resetBtn
-                                    }
-                                    onClick={() =>
-                                        setIsSettingsOpen(
-                                            false
-                                        )
-                                    }
-                                >
-                                    閉じる
-                                </button>
+        <div className={styles.headerButtons}>
+          <button className={styles.addButton} onClick={handleOpenAddForm}>
+            ＋ カード追加
+          </button>
+          <button className={styles.shuffleButton} onClick={handleShuffle}>
+            シャッフル
+          </button>
+          <button className={styles.modeButton} onClick={() => setShowModeMenu(!showModeMenu)}>
+            モード変更
+          </button>
 
-                                <button
-                                    className={
-                                        styles.saveButton
-                                    }
-                                    onClick={
-                                        handleSaveApiKey
-                                    }
-                                >
-                                    保存
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
+          <div className={styles.modeWrapper}>
 
-                {/* 単語帳タイトル */}
-                <h1 className={styles.title}>
-                    {book?.markerLabel ? `${book.markerLabel}` : `単語帳 ${id}`}
-                </h1>
+            {showModeMenu && (
+              <div className={styles.modeMenu}>
+                <button className={mode === 'card' ? styles.activeMode : ''} onClick={() => {
+                  setMode('card');
+                  setOpenedIds([]);
+                  setShowAnswers(false);
+                  setShowModeMenu(false);
+                }}
+                >
+                  カードモード
+                </button>
 
-                <div className={styles.headerButtons}>
-                    <button className={styles.addButton} onClick={handleOpenAddForm}>
-                        ＋ カード追加
-                    </button>
-                    <button className={styles.shuffleButton} onClick={handleShuffle}>
-                        シャッフル
-                    </button>
-                    <button className={styles.modeButton} onClick={() => setShowModeMenu(!showModeMenu)}>
-                        モード変更
-                    </button>
+                <button className={mode === 'test' ? styles.activeMode : ''} onClick={() => {
+                  setMode('test');
+                  setOpenedIds([]);
+                  setShowAnswers(false);
+                  setShowModeMenu(false);
+                }}
+                >
+                  テストモード
+                </button>
 
-                    <div className={styles.modeWrapper}>
+                <button className={mode === 'edit' ? styles.activeMode : ''} onClick={() => {
+                  setMode('edit');
+                  setOpenedIds([]);
+                  setShowAnswers(false);
+                  setShowModeMenu(false);
+                }}
+                >
+                  編集モード
+                </button>
+              </div>
+            )}
+          </div>
+          <div className={styles.filterButtons}>
+            <button
+              className={`${styles.filterButton} ${styles.filterAll}`}
+              onClick={() => setFilterType('all')}
+            >
+              全て
+            </button>
 
-                        {showModeMenu && (
-                            <div className={styles.modeMenu}>
-                                <button className={mode === 'card' ? styles.activeMode : ''} onClick={() => {
-                                    setMode('card');
-                                    setOpenedIds([]);
-                                    setShowAnswers(false);
-                                    setShowModeMenu(false);
-                                }}
-                                >
-                                    カードモード
-                                </button>
+            <button
+              className={`${styles.filterButton} ${styles.filterLearned}`}
+              onClick={() => setFilterType('learned')}
+            >
+              学習済み
+            </button>
 
-                                <button className={mode === 'test' ? styles.activeMode : ''} onClick={() => {
-                                    setMode('test');
-                                    setOpenedIds([]);
-                                    setShowAnswers(false);
-                                    setShowModeMenu(false);
-                                }}
-                                >
-                                    テストモード
-                                </button>
+            <button
+              className={`${styles.filterButton} ${styles.filterUnlearned}`}
+              onClick={() => setFilterType('unlearned')}
+            >
+              未学習
+            </button>
+            <button
+              className={`${styles.iconBtn} ${styles.reconstruct}`}
+              title="AIで文章題生成"
+              onClick={() =>
+                handleGenerateByAI()
+              }
+              disabled={
+                generatingId !== null
+              }
+            >
+              {generatingId ? (
+                <span>
+                  ⏳
+                  生成中...
+                </span>
+              ) : (
+                <span>
+                  AI生成
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
 
-                                <button className={mode === 'edit' ? styles.activeMode : ''} onClick={() => {
-                                    setMode('edit');
-                                    setOpenedIds([]);
-                                    setShowAnswers(false);
-                                    setShowModeMenu(false);
-                                }}
-                                >
-                                    編集モード
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                    <div className={styles.filterButtons}>
-                        <button
-                            className={`${styles.filterButton} ${styles.filterAll}`}
-                            onClick={() => setFilterType('all')}
-                        >
-                            全て
-                        </button>
 
-                        <button
-                            className={`${styles.filterButton} ${styles.filterLearned}`}
-                            onClick={() => setFilterType('learned')}
-                        >
-                            学習済み
-                        </button>
+      {/* カード追加フォーム */}
+      {isAddFormOpen && (
+        <div className={styles.formCard}>
+          <h2 className={styles.formTitle}>カードを追加</h2>
 
-                        <button
-                            className={`${styles.filterButton} ${styles.filterUnlearned}`}
-                            onClick={() => setFilterType('unlearned')}
-                        >
-                            未学習
-                        </button>
-                        <button
-                            className={`${styles.iconBtn} ${styles.reconstruct}`}
-                            title="AIで文章題生成"
-                            onClick={() =>
-                                handleGenerateByAI()
-                            }
-                            disabled={
-                                generatingId !== null
-                            }
-                        >
-                            {generatingId ? (
-                                <span>
-                                    ⏳
-                                    生成中...
-                                </span>
-                            ) : (
-                                <span>
-                                    ✨
-                                    AIで文章題生成
-                                </span>
-                            )}
-                        </button>
-                        <button
-                            onClick={() =>
-                                handleSaveApiKey()
-                            }
-                        >
-                            <span>Gemini API設定</span>
-                        </button>
-                    </div>
+          <label className={styles.field}>
+            <span className={styles.fieldLabel}>問題</span>
+            <textarea
+              className={styles.textArea}
+              value={newQuestion}
+              placeholder="例: 桶狭間の戦いは何年？"
+              onChange={(event) => setNewQuestion(event.target.value)}
+            />
+          </label>
+
+          <label className={styles.field}>
+            <span className={styles.fieldLabel}>答え</span>
+            <textarea
+              className={styles.textArea}
+              value={newAnswer}
+              placeholder="例: 1560年"
+              onChange={(event) => setNewAnswer(event.target.value)}
+            />
+          </label>
+
+          <div className={styles.formButtons}>
+            <button className={styles.secondaryButton} onClick={handleCloseAddForm}>
+              キャンセル
+            </button>
+            <button className={styles.primaryButton} onClick={handleAddCard}>
+              追加する
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className={mode === 'test' ? styles.testModeList : styles.cardList}>
+        {mode === 'test' && (
+          <h2 className={styles.testModeTitle}>問題一覧</h2>
+        )}
+        {filteredCards.map((card, index) => (
+          <div key={card.id} className={mode === 'test' ? styles.testModeCard : styles.card}>
+            {/* ── 問題文エリア（cardTop） ── */}
+            <div className={styles.cardTop}>
+              <label className={styles.checkboxArea}>
+                <input type="checkbox" checked={card.learned} onChange={() => toggleCheck(card.id)} />
+              </label>
+
+              <div className={styles.questionArea}>
+                <div className={styles.questionText} onClick={() => mode === 'card' && handleToggle(card.id)}>
+                  {mode === 'test' ? `(${index + 1}) ` : ''}
+                  {card.question}
                 </div>
+                {mode === 'card' && (
+                  <button className={styles.arrowButton} onClick={() => handleToggle(card.id)}>
+                    {openedIds.includes(card.id) ? '▲' : '▼'}
+                  </button>
+                )}
+              </div>
+              
+              {/* 💡 ここにあった削除ボタンを削除しました */}
             </div>
 
+            {/* ── 答え表示エリア ── */}
+            {(mode === 'card' || mode === 'edit') && (
+              <div
+                className={`${styles.answer} ${mode === 'edit' || openedIds.includes(card.id)
+                  ? styles.answerOpen
+                  : ''
+                  }`}
+              >
+                {/* 💡 1. 答えのテキストを <div> で囲んで独立させます */}
+                <div>{card.answer}</div>
 
-            {/* カード追加フォーム */}
-            {isAddFormOpen && (
-                <div className={styles.formCard}>
-                    <h2 className={styles.formTitle}>カードを追加</h2>
-
-                    <label className={styles.field}>
-                        <span className={styles.fieldLabel}>問題</span>
-                        <textarea
-                            className={styles.textArea}
-                            value={newQuestion}
-                            placeholder="例: 桶狭間の戦いは何年？"
-                            onChange={(event) => setNewQuestion(event.target.value)}
-                        />
-                    </label>
-
-                    <label className={styles.field}>
-                        <div className={styles.aiRow}>
-                            <button
-                                type="button"
-                                onClick={() => handleGenerateAnswerByAI()}
-                                disabled={generatingId === 'new-card'}
-                            >
-                                {generatingId === 'new-card'
-                                    ? '生成中...'
-                                    : '✨AIで答え生成'}
-                            </button>
-                        </div>
-                        <span className={styles.fieldLabel}>答え</span>
-
-                        <textarea
-                            className={styles.textArea}
-                            value={newAnswer}
-                            placeholder="例: 1560年"
-                            onChange={(event) => setNewAnswer(event.target.value)}
-                        />
-                    </label>
-
-                    <div className={styles.formButtons}>
-                        <button className={styles.secondaryButton} onClick={handleCloseAddForm}>
-                            キャンセル
-                        </button>
-                        <button className={styles.primaryButton} onClick={handleAddCard}>
-                            追加する
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            <div className={styles.cardList}>
-                {filteredCards.map((card, index) => (
-                    <div key={card.id} className={styles.card}>
-                        <div className={styles.cardTop}>
-                            <label className={styles.checkboxArea}>
-                                <input
-                                    type="checkbox"
-                                    checked={card.learned}
-                                    onChange={() => toggleCheck(card.id)}
-                                />
-                            </label>
-
-
-                            {/* 問題ボタン */}
-                            <div className={styles.questionArea}>
-                                <div className={styles.questionText} onClick={() => mode === 'card' && handleToggle(card.id)}>
-                                    {mode === 'test' ? `(${index + 1}) ` : ''}
-                                    {card.question}
-                                </div>
-                                {mode === 'card' && (
-                                    <button className={styles.arrowButton} onClick={() => handleToggle(card.id)}>
-                                        {openedIds.includes(card.id) ? '▲' : '▼'}
-                                    </button>
-                                )}
-
-                            </div>
-                            {/* 削除ボタン */}
-                            {mode === 'edit' && (
-                                <button className={styles.deleteButton} onClick={() => handleDelete(card.id)}>
-                                    削除
-                                </button>
-                            )}
-                        </div>
-
-                        {/* 答え表示エリア */}
-                        {(mode === 'card' || mode === 'edit') && (
-                            <div
-                                className={`${styles.answer} ${mode === 'edit' || openedIds.includes(card.id)
-                                    ? styles.answerOpen
-                                    : ''
-                                    }`}
-                            >
-                                {card.answer}
-                            </div>
-                        )}
-
-                    </div>
-                ))}
-                {mode === 'card' && (
-                    <>
-                        <button
-                            className={styles.questionButton}
-                            onClick={() => handleToggleSentence()}
-                        >
-                            {questionSentence}
-                        </button>
-
-                        {isOpen && (
-                            <div>
-                                {Object.entries(answerObj).map(
-                                    ([key, value]) => (
-                                        <div key={key}>
-                                            {key}: {value}
-                                        </div>
-                                    )
-                                )}
-                            </div>
-                        )}
-                    </>
+                {/* 💡 2. 削除ボタンをここに移動し、deleteAreaで囲みます */}
+                {mode === 'edit' && (
+                  <div className={styles.deleteArea}>
+                    <button className={styles.deleteButton} onClick={() => handleDelete(card.id)}>
+                      削除
+                    </button>
+                  </div>
                 )}
-                {mode === 'test' && (
-                    <div className={styles.questionButton}>
-                        {questionSentence}
+              </div>
+            )}
+          </div>
+        ))}
+        {mode === 'card' && (
+          <>
+            <button
+              className={styles.questionButton}
+              onClick={() => handleToggleSentence()}
+            >
+              {questionSentence}
+            </button>
+
+            {isOpen && (
+              <div>
+                {Object.entries(answerObj).map(
+                  ([key, value]) => (
+                    <div key={key}>
+                      {key}: {value}
                     </div>
                 )}
 
