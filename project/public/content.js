@@ -374,6 +374,176 @@ window.addEventListener('message', (e) => {
             }
             return;
         }
+
+        if (data.type === 'DELETE_WORD_CARD') {
+            const cardId = data.cardId;
+
+            console.log(
+                'content.js received DELETE_WORD_CARD',
+                cardId
+            );
+
+            chromeApi.storage.local.get(
+                ['wordCard', 'highlights'],
+                (res) => {
+
+                    const cards = Array.isArray(res.wordCard)
+                        ? res.wordCard
+                        : [];
+
+                    const nextCards = cards.filter(
+                        (card) => card.id !== cardId
+                    );
+
+                    chromeApi.storage.local.set(
+                        {
+                            wordCard: nextCards,
+                            highlights: nextCards,
+                        },
+                        () => {
+
+                            console.log(
+                                'deleted card, new count=',
+                                nextCards.length
+                            );
+
+                            window.postMessage(
+                                {
+                                    type: 'EXTENSION_WORD_CARDS',
+                                    cards: nextCards,
+                                },
+                                '*'
+                            );
+
+                            window.postMessage(
+                                {
+                                    type: 'DELETE_WORD_CARD_RESULT',
+                                    success: true,
+                                    cardId,
+                                },
+                                '*'
+                            );
+                        }
+                    );
+
+                }
+            );
+
+            return;
+        }
+
+        if (data.type === 'DELETE_WORD_BOOK') {
+            const bookId = data.bookId;
+
+            console.log('content.js received DELETE_WORD_BOOK', bookId);
+
+            if (!bookId) {
+                console.warn('DELETE_WORD_BOOK: bookId is missing');
+                return;
+            }
+
+            chromeApi.storage.local.get(['wordBook'], (res) => {
+                try {
+                    const books = Array.isArray(res.wordBook) ? res.wordBook : [];
+
+                    const beforeCount = books.length;
+
+                    const nextBooks = books.filter((book) => book.id !== bookId);
+
+                    const isDeleted = nextBooks.length !== beforeCount;
+
+                    if (!isDeleted) {
+                        console.warn('DELETE_WORD_BOOK: target not found', bookId);
+                    }
+
+                    chromeApi.storage.local.set(
+                        {
+                            wordBook: nextBooks,
+                        },
+                        () => {
+                            if (chromeApi.runtime?.lastError) {
+                                console.error('storage.set error:', chromeApi.runtime.lastError);
+                                return;
+                            }
+
+                            console.log('deleted book, new count=', nextBooks.length);
+
+                            // UI更新用
+                            window.postMessage(
+                                {
+                                    type: 'EXTENSION_WORD_BOOKS_UPDATED',
+                                    books: nextBooks,
+                                },
+                                '*'
+                            );
+
+                            // 削除通知
+                            window.postMessage(
+                                {
+                                    type: 'DELETE_WORD_BOOK_RESULT',
+                                    success: true,
+                                    bookId,
+                                },
+                                '*'
+                            );
+                        }
+                    );
+                } catch (err) {
+                    console.error('DELETE_WORD_BOOK error:', err);
+
+                    window.postMessage(
+                        {
+                            type: 'DELETE_WORD_BOOK_RESULT',
+                            success: false,
+                            bookId,
+                        },
+                        '*'
+                    );
+                }
+            });
+
+            
+
+            return;
+        }
+
+        //API保存
+        if (data.type === 'SAVE_API_KEY') {
+            console.log('content.js received SAVE_API_KEY, key=', data.apiKey);
+            chrome.storage.local.set(
+                { geminiApiKey: data.apiKey },
+                () => {
+                    console.log('APIキー保存完了');
+
+                    window.postMessage({
+                        type: 'SAVE_API_KEY_RESULT',
+                        success: true,
+                    }, '*');
+                }
+            );
+
+
+            return;
+        }
+
+        //API取得
+        if (data.type === 'REQUEST_API_KEY') {
+            console.log('content.js received REQUEST_API_KEY, fetching from storage');
+            chrome.storage.local.get(
+                ['geminiApiKey'],
+                (result) => {
+                    window.postMessage({
+                        type: 'API_KEY_RESULT',
+                        apiKey: result.geminiApiKey ?? '',
+                    }, '*');
+                }
+            );
+
+            console.log('content.js received REQUEST_API_KEY');
+
+            return;
+        }
+        
     } catch (e) {
         // noop
     }
