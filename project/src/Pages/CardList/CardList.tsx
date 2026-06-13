@@ -60,6 +60,7 @@ const CardList: React.FC = () => {
     const [mode, setMode] = useState<'card' | 'test' | 'edit'>('card');
     const [showModeMenu, setShowModeMenu] = useState(false);
     const [showAnswers, setShowAnswers] = useState(false);
+    const [showAIMenu, setShowAIMenu] = useState(false);
 
     const [questionSentence, setQuestionSentence] = useState('');
     const [answerObj, setAnswerObj] = useState<Record<string, string>>({});
@@ -788,35 +789,42 @@ const CardList: React.FC = () => {
                         >
                             未学習
                         </button>
-                        <button
-                            className={`${styles.iconBtn} ${styles.reconstruct}`}
-                            title="AIで文章題生成"
-                            onClick={() =>
-                                handleGenerateByAI()
-                            }
-                            disabled={
-                                generatingId !== null
-                            }
-                        >
-                            {generatingId ? (
-                                <span>
-                                    ⏳
-                                    生成中...
-                                </span>
-                            ) : (
-                                <span>
-                                    ✨
-                                    AIで文章題生成
-                                </span>
-                            )}
-                        </button>
-                        <button
-                            onClick={() =>
-                                handleSaveApiKey()
-                            }
-                        >
-                            <span>Gemini API設定</span>
-                        </button>
+                        {/* ▼ 1つにまとめたAIボタン ▼ */}
+            <div className={styles.modeWrapper}>
+              <button
+                className={`${styles.iconBtn} ${styles.reconstruct}`}
+                    onClick={() => setShowAIMenu(!showAIMenu)}
+                    disabled={generatingId !== null}
+                >
+                    {generatingId ? (
+                    <span>⏳ 生成中...</span>
+                    ) : (
+                    <span>AIメニュー</span>
+                    )}
+                </button>
+
+                {/* クリック時に開く選択肢 */}
+                {showAIMenu && (
+                    <div className={styles.modeMenu}>
+                            <button
+                                onClick={() => {
+                                handleGenerateByAI();
+                                setShowAIMenu(false); // 押した後にメニューを閉じる
+                                }}
+                            >
+                                文章題を生成
+                            </button>
+                            <button
+                                onClick={() => {
+                                setIsSettingsOpen(true); // API設定の入力画面を開く
+                                setShowAIMenu(false);
+                                }}
+                            >
+                                API設定
+                            </button>
+                            </div>
+                        )}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -875,46 +883,43 @@ const CardList: React.FC = () => {
                     <div key={card.id} className={styles.card}>
                         <div className={styles.cardTop}>
                             <label className={styles.checkboxArea}>
-                                <input
-                                    type="checkbox"
-                                    checked={card.learned}
-                                    onChange={() => toggleCheck(card.id)}
-                                />
+                                <input type="checkbox" checked={card.learned} onChange={() => toggleCheck(card.id)} />
                             </label>
 
-
-                            {/* 問題ボタン */}
                             <div className={styles.questionArea}>
                                 <div className={styles.questionText} onClick={() => mode === 'card' && handleToggle(card.id)}>
-                                    {mode === 'test' ? `(${index + 1}) ` : ''}
-                                    {card.question}
+                                {mode === 'test' ? `(${index + 1}) ` : ''}
+                                {card.question}
                                 </div>
                                 {mode === 'card' && (
-                                    <button className={styles.arrowButton} onClick={() => handleToggle(card.id)}>
-                                        {openedIds.includes(card.id) ? '▲' : '▼'}
-                                    </button>
-                                )}
-
-                            </div>
-                            {/* 削除ボタン */}
-                            {mode === 'edit' && (
-                                <button className={styles.deleteButton} onClick={() => handleDelete(card.id)}>
-                                    削除
+                                <button className={styles.arrowButton} onClick={() => handleToggle(card.id)}>
+                                    {openedIds.includes(card.id) ? '▲' : '▼'}
                                 </button>
-                            )}
-                        </div>
+                                )}
+                            </div>
+                            </div>
 
-                        {/* 答え表示エリア */}
-                        {(mode === 'card' || mode === 'edit') && (
+                            {/* 答え表示エリア */}
+                            {(mode === 'card' || mode === 'edit') && (
                             <div
                                 className={`${styles.answer} ${mode === 'edit' || openedIds.includes(card.id)
-                                    ? styles.answerOpen
-                                    : ''
-                                    }`}
+                                ? styles.answerOpen
+                                : ''
+                                }`}
                             >
-                                {card.answer}
+                                {/* 💡 答えの文字を div で囲みます */}
+                                <div>{card.answer}</div>
+
+                                {/* 💡 先ほど消した削除ボタンをここに貼り付け、deleteArea で囲みます */}
+                                {mode === 'edit' && (
+                                <div className={styles.deleteArea}>
+                                    <button className={styles.deleteButton} onClick={() => handleDelete(card.id)}>
+                                    削除
+                                    </button>
+                                </div>
+                                )}
                             </div>
-                        )}
+                            )}
 
                     </div>
                 ))}

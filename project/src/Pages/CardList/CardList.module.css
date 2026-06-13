@@ -69,7 +69,27 @@
 
 .title { font-size: clamp(1.6rem, 2.2vw, 2.2rem); margin: 0; font-weight: 800; }
 
-.headerButtons { display: flex; gap: 8px; }
+.headerButtons { 
+    display: flex; 
+    gap: 12px; 
+    align-items: flex-end; 
+    flex-wrap: wrap; 
+}
+
+.filterGroup {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.filterLabel {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #6b7280;
+    margin-left: 4px;
+    margin-bottom: 6px;
+    line-height: 1;
+}
 
 /* =========================================
    共通ボタン設定
@@ -159,6 +179,12 @@ button:hover {
     cursor: pointer;
     color: #40444b;
     transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.filterButtons { 
+    display: flex; 
+    gap: 8px; 
+    align-items: center;
 }
 
 /* =========================================
@@ -503,7 +529,7 @@ button:hover {
 
     .header { flex-direction: column; align-items: flex-start; gap: 12px; }
 
-    .headerButtons { width: 100%; flex-direction: column; }
+    .headerButtons { width: 100%; flex-direction: column; align-items: stretch; }
 
     .addButton,
     .shuffleButton,
