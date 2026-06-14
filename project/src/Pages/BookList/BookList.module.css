@@ -1,5 +1,3 @@
-/* ミントが変えるとこ */
-
 .container {
 	min-height: 100vh;
 	padding: 32px 20px 40px;
@@ -11,31 +9,54 @@
 }
 
 .header {
-  position: relative; /* 子要素の絶対配置の基準にする */
   display: flex;
   align-items: center;
-  justify-content: center; /* 基本的に中央に寄せる */
-  min-height: 60px; /* 必要に応じて高さを確保 */
+  justify-content: space-between; /* 💡 ボタンとタイトルを左右の両端に振り分ける */
+  min-height: 60px;
+  padding: 0 16px; /* 左右に少し余白を作る */
+  margin-bottom: 24px;
 }
 
 .reviewButton {
-  position: absolute; /* ヘッダー全体の流れから浮かせる */
-  left: 16px;        /* 左端から少し余白をあける */
+  /* ❌ position: absolute; と left: 16px; を完全に削除 */
   background-color: #22536d;
   color: white;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap; /* 💡 ボタン内の文字が途中で勝手に改行されるのを防ぐ */
 }
 
+/* タイトルの位置を微調整 */
 .title {
-  font-size: 24px;   /* サイズはお好みで */
   margin: 0;
-  text-align: center;
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
 }
 
-.title {
-	margin: 0;
-	font-size: clamp(2rem, 3vw, 3rem);
-	font-weight: 800;
-	letter-spacing: 0.04em;
+/* --- スマホ用のレスポンシブ対応 --- */
+@media (max-width: 640px) {
+  .header {
+    flex-direction: column; /* 💡 スマホでは強制的に縦並びにする */
+    align-items: center;    /* 中央揃え */
+    gap: 16px;              /* ボタンとタイトルの間に隙間を作る */
+    min-height: auto;
+  }
+
+  /* スマホの時はボタンを下に持っていきたい場合はこれ（お好みで） */
+  .reviewButton {
+    order: 2; 
+    width: 100%; /* スマホ画面でボタンを押しやすく横いっぱいに広げる（お好みで消してもOK） */
+    text-align: center;
+  }
+
+  .title {
+    order: 1;
+    font-size: 1.8rem;
+  }
 }
 
 .formTitle {
