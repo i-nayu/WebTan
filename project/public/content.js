@@ -333,6 +333,27 @@ window.addEventListener('message', (e) => {
             }
             return;
         }
+// ==========================================
+        // 新規追加: highlights のみを取得して送信するハンドラー
+        // ==========================================
+        if (data.type === 'REQUEST_STORED_HIGHLIGHTS') {
+            console.log('content.js received REQUEST_STORED_HIGHLIGHTS');
+            if (!chromeApi || !chromeApi.storage || !chromeApi.storage.local) {
+                console.warn('chrome.storage is not available');
+                window.postMessage({ type: 'EXTENSION_STORED_HIGHLIGHTS', highlights: [] }, '*');
+                return;
+            }
+
+            chromeApi.storage.local.get(['highlights'], (res) => {
+                const hs = (res && Array.isArray(res.highlights)) ? res.highlights : [];
+                console.log('content.js sending EXTENSION_STORED_HIGHLIGHTS, count =', hs.length);
+                window.postMessage({
+                    type: 'EXTENSION_STORED_HIGHLIGHTS',
+                    highlights: hs
+                }, '*');
+            });
+            return;
+        }
 
         if (data.type === 'SAVE_EXTENSION_WORD_BOOKS' && data.book && (data.book.bookId || data.book.id)) {
             const newBook = data.book;
