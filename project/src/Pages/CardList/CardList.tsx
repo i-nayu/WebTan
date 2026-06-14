@@ -880,11 +880,11 @@ const CardList: React.FC = () => {
                     </label>
 
                     <div className={styles.formButtons}>
-                        <button className={styles.secondaryButton} onClick={handleCloseAddForm}>
-                            キャンセル
-                        </button>
                         <button className={styles.primaryButton} onClick={handleAddCard}>
                             追加する
+                        </button>
+                        <button className={styles.secondaryButton} onClick={handleCloseAddForm}>
+                            キャンセル
                         </button>
                     </div>
                 </div>
