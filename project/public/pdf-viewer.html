@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>PDF Word Marker</title>
+  <link rel="stylesheet" href="pdfjs/viewer.css">
+  <link rel="stylesheet" href="pdf-viewer.css">
+</head>
+<body>
+  <div class="wrapper">
+    <div class="container">
+      
+      <!-- ヘッダー領域 -->
+      <div class="header">
+        <div class="headerTop">
+          <h1 class="title">PDF Word Marker</h1>
+          <div class="toolbar-left">
+            <input type="file" id="file-input" accept="application/pdf" />
+            <span id="file-name-display" class="file-name">ファイル未選択</span>
+          </div>
+        </div>
+
+        <!-- マーカー設定パネル -->
+        <div class="settingsPanel toolbar-right">
+          <!-- 内部動作に必要なため残していますが非表示にしています -->
+          <select id="book-select" style="display: none;">
+            <option value="">(新規ブック)</option>
+          </select>
+          
+          <div class="setting-item">
+            <label for="marker-label" class="labelTag tagAnswer">ラベル</label>
+            <input type="text" id="marker-label" class="apiKeyInput input-small" value="default" placeholder="ラベル名" />
+          </div>
+          
+          <div class="setting-item color-item">
+            <label class="labelTag tagQuestion">マーカー色 (30色)</label>
+            <div class="color-palette" id="color-palette"></div>
+            <input type="hidden" id="marker-color" value="#ffff00" />
+          </div>
+          
+          <button id="add-marker-btn" class="saveButton" disabled>マーカーを引く</button>
+        </div>
+      </div>
+
+      <!-- PDF表示領域 -->
+      <div id="viewer-container" class="list"></div>
+
+    </div>
+  </div>
+
+  <script type="module" src="pdf-viewer.js"></script>
+</body>
+</html>

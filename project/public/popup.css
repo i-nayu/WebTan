@@ -1,5 +1,188 @@
-body { font-family: Arial, Helvetica, sans-serif; margin: 0; padding: 12px; width: 280px; }
-.container h1 { font-size: 16px; margin: 0 0 8px 0; }
-.row { margin: 8px 0; }
-button { padding: 8px 10px; font-size: 14px; cursor: pointer; }
-.note { margin-top: 12px; font-size: 12px; color: #555; }
+/* popup.css */
+
+:root {
+  --primary-color: #1a73e8;
+  --primary-hover: #1557b0;
+  --bg-color: #ffffff;
+  --text-main: #202124;
+  --text-sub: #5f6368;
+  --border-color: #dadce0;
+  --input-bg: #f1f3f4;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  width: 360px; /* ポップアップ幅 */
+  max-width: 100%;
+  overflow-x: hidden; 
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  font-size: 14px;
+}
+
+.container {
+  padding: 16px;
+  width: 100%;
+}
+
+/* 見出し */
+h1 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+h2 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 20px 0 12px 0;
+  color: var(--text-main);
+}
+
+.row {
+  margin-bottom: 12px;
+}
+
+/* フォーム要素の整列 */
+label {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  gap: 8px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+input[type="checkbox"] {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary-color);
+}
+
+/* ★ 30色カラーパレットのグリッドスタイル (10列で綺麗に整列) */
+.color-palette {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 6px;
+  background-color: #f8f9fa;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  margin-top: 4px;
+}
+
+.color-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  transition: transform 0.1s, border-color 0.1s;
+}
+
+.color-swatch:hover {
+  transform: scale(1.2);
+}
+
+.color-swatch.selected {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px #4285f4;
+  transform: scale(1.15);
+}
+
+/* ボタン全般 */
+button {
+  background-color: var(--primary-color);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: var(--primary-hover);
+}
+
+/* ショートカット画面を開くボタン */
+#open-shortcuts {
+  width: 100%;
+  background-color: #f8f9fa;
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  padding: 10px;
+}
+
+#open-shortcuts:hover {
+  background-color: #e8eaed;
+}
+
+/* テキスト入力欄 */
+input[type="text"],
+#newBookId,
+#newLabel {
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--input-bg);
+  color: var(--text-main);
+  transition: border-color 0.2s, background-color 0.2s;
+  padding: 8px !important;
+}
+
+input[type="text"]:focus,
+#newBookId:focus,
+#newLabel:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  background-color: #fff;
+}
+
+/* 追加/更新エリアのレイアウト */
+#markerSets + div {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px !important;
+}
+
+#newBookId, #newLabel {
+  flex: 1;
+  width: auto !important;
+  margin-right: 0 !important;
+}
+
+#addSet {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* 注意書き */
+.note {
+  margin-top: 24px;
+  font-size: 12px;
+  color: var(--text-sub);
+  background-color: #f8f9fa;
+  padding: 10px;
+  border-radius: 6px;
+  border-left: 4px solid #dadce0;
+  line-height: 1.5;
+  overflow-wrap: break-word;
+}
+
+#markerSets, #commands {
+  min-height: 4px;
+}

@@ -11,8 +11,24 @@
 }
 
 .header {
-	max-width: 960px;
-	margin: 0 auto 24px;
+  position: relative; /* 子要素の絶対配置の基準にする */
+  display: flex;
+  align-items: center;
+  justify-content: center; /* 基本的に中央に寄せる */
+  min-height: 60px; /* 必要に応じて高さを確保 */
+}
+
+.reviewButton {
+  position: absolute; /* ヘッダー全体の流れから浮かせる */
+  left: 16px;        /* 左端から少し余白をあける */
+  background-color: #22536d;
+  color: white;
+}
+
+.title {
+  font-size: 24px;   /* サイズはお好みで */
+  margin: 0;
+  text-align: center;
 }
 
 .title {
@@ -78,16 +94,68 @@
 }
 
 .field {
-	display: block;
-	margin-bottom: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .fieldLabel {
-	display: block;
-	margin-bottom: 8px;
-	font-size: 0.92rem;
-	font-weight: 700;
-	color: #374151;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* パレットを綺麗に並べるための設定 */
+.colorPalette {
+    display: flex;
+    flex-wrap: wrap; /* 横幅がいっぱいになったら自動で折り返す */
+    gap: 6px;       /* 丸ボタン同士の隙間 */
+    margin-bottom: 8px;
+    max-width: 340px; /* 1行に並ぶ個数を調整したい場合はここを変更 */
+}
+
+/* 丸いカラーボタンの基本スタイル */
+.paletteButton {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%; /* 完全な丸にする */
+    border: 1px solid rgba(0, 0, 0, 0.2); /* 淡い枠線をつけて白っぽい色も見えるようにする */
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.1s ease;
+}
+
+.paletteButton:hover {
+    transform: scale(1.15); /* マウスを載せたときに少し大きくする */
+}
+
+/* 現在選択されている色に適用するスタイル */
+.activeColor {
+    border: 2px solid #111111; /* はっきりとした黒枠をつける */
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+    transform: scale(1.15);
+}
+
+/* カラーピッカー部分 */
+.colorInputRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.colorInput {
+    cursor: pointer;
+    width: 40px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.colorCode {
+    font-family: monospace;
+    font-size: 14px;
+    text-transform: uppercase; /* カラーコードを大文字で統一して綺麗に見せる */
 }
 
 .textInput {
@@ -107,26 +175,7 @@
 	box-shadow: 0 0 0 4px var(--accent-shadow);
 }
 
-.colorInputRow {
-	display: flex;
-	align-items: center;
-	gap: 12px;
-}
 
-.colorInput {
-	width: 64px;
-	height: 48px;
-	border: 1px solid #d7dce3;
-	border-radius: 14px;
-	background: #fff;
-	padding: 4px;
-}
-
-.colorCode {
-	font-size: 0.95rem;
-	font-weight: 600;
-	color: #4b5563;
-}
 
 .formButtons {
 	display: flex;
@@ -170,7 +219,6 @@
 .primaryButton {
     background: var(--accent-color);
 	color: #fff;
-	box-shadow: 0 12px 24px rgba(255, 152, 0, 0.28);
 }
 
 .list {
