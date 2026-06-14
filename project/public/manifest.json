@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "WebTan",
+  "name": "タンタン",
   "version": "1.0",
   "permissions": [
     "storage",
@@ -9,7 +9,7 @@
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "WebTan"
+    "default_title": "タンタン"
   },
   "background": {
     "service_worker": "background.js"
@@ -26,14 +26,14 @@
         "default": "Shift+Alt+M",
         "mac": "Command+MacCtrl+M"
       },
-      "description": "Toggle marker"
+      "description": "起動/終了"
     },
     "save-highlights": {
       "suggested_key": {
         "default": "Alt+Shift+M",
         "mac": "Alt+Shift+M"
       },
-      "description": "Save highlights"
+      "description": "単語を送信"
     }
   }
 }
