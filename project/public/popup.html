@@ -7,32 +7,38 @@
   <title>WordMarker 設定</title>
 </head>
 <body>
-        <!-- PDFマーカーを開くボタンを追加 -->
+  <div class="container">
+    <h1>設定</h1>
+    
+    <!-- PDFマーカーを開くボタン -->
     <div class="row">
       <button id="open-pdf-viewer" style="width: 100%; font-size: 14px; padding: 12px; background-color: #34a853; margin-bottom: 8px;">
         📄 PDFマーカーを開く
       </button>
     </div>
-  <div class="container">
-    <h1>設定</h1>
+
     <div class="row">
       <button id="open-shortcuts">ショートカット画面を開く</button>
     </div>
+    
     <div class="row">
       <label>
         <input type="checkbox" id="toggle-delete" />
         ページ上に削除ボタンを表示する
       </label>
     </div>
+    
+    <!-- マーカー色のカラーパレット表示部 (JSで30色の丸ボタンを動的生成します) -->
     <div class="row">
-      <label for="markerColor">マーカー色: </label>
-      <input type="color" id="markerColor" value="#FFFF00" />
+      <label>マーカー色 (30色): </label>
+      <div class="color-palette" id="colorPalette"></div>
+      <input type="hidden" id="markerColor" value="#FFFF00" />
     </div>
+    
     <div class="row">
       <h2>マーカーブック</h2>
       <div id="markerSets"></div>
       <div style="margin-top:8px">
-        <input id="newBookId" placeholder="bookID" style="width:140px;padding:6px;margin-right:6px" />
         <input id="newLabel" placeholder="ラベル名" style="width:140px;padding:6px;margin-right:6px" />
         <button id="addSet">追加/更新</button>
       </div>

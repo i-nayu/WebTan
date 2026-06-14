@@ -3,41 +3,51 @@
 <head>
   <meta charset="UTF-8">
   <title>PDF Word Marker</title>
-  <!-- PDF.js標準のスタイルと独自スタイルを読み込み -->
   <link rel="stylesheet" href="pdfjs/viewer.css">
   <link rel="stylesheet" href="pdf-viewer.css">
 </head>
 <body>
-  <!-- ツールバー -->
-  <div class="toolbar">
-    <div class="toolbar-left">
-      <input type="file" id="file-input" accept="application/pdf" />
-      <span id="file-name-display" class="file-name">ファイル未選択</span>
-    </div>
-    
-    <!-- ★変更: ラベル名、色、bookIDを取得・選択できるUIを追加 -->
-    <div class="toolbar-right">
-      <label for="book-select">ブック:</label>
-      <select id="book-select" title="保存先のブックを選択">
-        <option value="">(新規ブック)</option>
-      </select>
+  <div class="wrapper">
+    <div class="container">
       
-      <label for="marker-label">ラベル:</label>
-      <input type="text" id="marker-label" value="default" placeholder="ラベル名" />
-      
-      <label for="marker-color">色:</label>
-      <input type="color" id="marker-color" value="#ffff00" />
-      
-      <button id="add-marker-btn" disabled>マーカーを引く</button>
+      <!-- ヘッダー領域 -->
+      <div class="header">
+        <div class="headerTop">
+          <h1 class="title">PDF Word Marker</h1>
+          <div class="toolbar-left">
+            <input type="file" id="file-input" accept="application/pdf" />
+            <span id="file-name-display" class="file-name">ファイル未選択</span>
+          </div>
+        </div>
+
+        <!-- マーカー設定パネル -->
+        <div class="settingsPanel toolbar-right">
+          <!-- 内部動作に必要なため残していますが非表示にしています -->
+          <select id="book-select" style="display: none;">
+            <option value="">(新規ブック)</option>
+          </select>
+          
+          <div class="setting-item">
+            <label for="marker-label" class="labelTag tagAnswer">ラベル</label>
+            <input type="text" id="marker-label" class="apiKeyInput input-small" value="default" placeholder="ラベル名" />
+          </div>
+          
+          <div class="setting-item color-item">
+            <label class="labelTag tagQuestion">マーカー色 (30色)</label>
+            <div class="color-palette" id="color-palette"></div>
+            <input type="hidden" id="marker-color" value="#ffff00" />
+          </div>
+          
+          <button id="add-marker-btn" class="saveButton" disabled>マーカーを引く</button>
+        </div>
+      </div>
+
+      <!-- PDF表示領域 -->
+      <div id="viewer-container" class="list"></div>
+
     </div>
   </div>
 
-  <!-- PDF表示領域 -->
-  <div id="viewer-container">
-    <!-- JSでここにページごとのキャンバスとテキストレイヤーが追加されます -->
-  </div>
-
-  <!-- スクリプトの読み込み -->
   <script type="module" src="pdf-viewer.js"></script>
 </body>
 </html>

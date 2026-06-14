@@ -1,104 +1,205 @@
+/* --- レイアウト構造 --- */
+
 body {
   margin: 0;
   padding: 0;
   font-family: system-ui, -apple-system, sans-serif;
-  background-color: #525659;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
+  background-color: #f0f2f5;
+  overflow: hidden; /* 親のスクロールを固定し、各エリアにスクロールを持たせる */
 }
 
-/* ツールバーの装飾 */
-.toolbar {
-  background-color: #323639;
-  color: white;
-  padding: 10px 16px;
+.wrapper {
+  background-color: #f0f2f5;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  height: 100vh;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+/* --- ヘッダー --- */
+.header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #eee;
+  background-color: #fff;
+  flex-shrink: 0; /* ヘッダーが潰れないように固定 */
+}
+
+.headerTop {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  z-index: 100;
+  margin-bottom: 12px;
+}
+
+.title {
+  font-size: 1.3rem;
+  margin: 0;
+  color: #333;
+  font-weight: bold;
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .file-name {
-  margin-left: 10px;
   font-size: 14px;
-  color: #ccc;
+  color: #666;
 }
 
-/* ★変更: 追加したフォーム要素がきれいに並ぶように調整 */
-.toolbar-right {
+/* --- 設定パネル --- */
+.settingsPanel {
+  padding: 12px 16px;
+  border: 1px solid #dbeafe;
+  background: #f8fbff;
+  border-radius: 10px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
-select, input[type="text"] {
-  padding: 6px;
-  border: 1px solid #555;
-  border-radius: 4px;
-  background-color: #fff;
-  font-size: 13px;
-  color: #333;
+.setting-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
-input[type="text"] {
-  width: 100px; /* 入力欄が長すぎないように固定 */
+.color-item {
+  flex: 1;
+  min-width: 250px;
 }
 
-input[type="color"] {
-  cursor: pointer;
-  border: 1px solid #555;
-  border-radius: 4px;
-  width: 32px;
-  height: 32px;
-  padding: 2px;
-  background-color: #fff;
-}
-
-button {
-  cursor: pointer;
-  padding: 8px 16px;
-  background-color: #1a73e8;
-  color: white;
-  border: none;
+.labelTag {
+  font-size: 0.75rem;
+  padding: 4px 10px;
   border-radius: 4px;
   font-weight: bold;
-  transition: background-color 0.2s;
-  margin-left: 4px;
+  display: inline-block;
+  margin-bottom: 6px;
+}
+.tagQuestion { background: #e8f5e9; color: #2e7d32; }
+.tagAnswer { background: #e3f2fd; color: #1976d2; }
+
+.apiKeyInput {
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 0 12px;
+  font: inherit;
+  box-sizing: border-box;
+  min-height: 36px;
+  background-color: #fff;
+}
+.apiKeyInput:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+.input-small {
+  width: 140px;
 }
 
-button:hover:not(:disabled) {
-  background-color: #1557b0;
+/* --- カラーパレット (3行10列) --- */
+.color-palette {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 4px;
+  background-color: #fff;
+  padding: 6px;
+  border-radius: 8px;
+  border: 1px solid #bfdbfe;
 }
 
-button:disabled {
-  background-color: #555;
-  color: #888;
+.color-swatch {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  transition: transform 0.1s, border-color 0.1s;
+}
+
+.color-swatch:hover {
+  transform: scale(1.2);
+}
+
+.color-swatch.selected {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px #4285f4;
+  transform: scale(1.15);
+}
+
+/* --- 保存（マーカーを引く）ボタン --- */
+.saveButton {
+  background-color: #4fc3f7;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  height: 38px;
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+.saveButton:hover:not(:disabled) {
+  opacity: 0.8;
+}
+
+.saveButton:disabled {
+  background-color: #cfd8dc;
+  color: #90a4ae;
   cursor: not-allowed;
 }
 
-/* PDF表示領域 */
-#viewer-container {
+/* --- PDF表示エリア (横スクロールを排除しピッタリ収める) --- */
+.list {
   flex: 1;
-  overflow: auto;
-  position: relative;
+  overflow-y: auto; /* 縦スクロールのみ */
+  overflow-x: hidden; /* ★変更: 横スクロールを完全に排除 */
+  padding: 24px 16px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 20px 0;
+  gap: 20px;
+  background-color: #f0f2f5; 
+  align-items: center; /* センタリング */
 }
 
-/* ページごとのラッパー */
+/* ページごとのラッパー (wrapperにrelativeを指定することで、ハイライトの座標がずれないようにする) */
 .pdf-page-wrapper {
-  position: relative;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  position: relative; /* ★超重要: 絶対配置ハイライトの基準にする */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
   background-color: white;
+  border-radius: 4px;
+  flex-shrink: 0; /* 勝手に縮んでレイアウトが壊れるのを防止 */
+  width: 100%; /* 横幅いっぱいにフィットさせる */
+  max-width: 100%;
 }
 
-/* テキストレイヤー */
+/* Canvas(PDFの描画自体)も横幅いっぱいに収める */
+.pdf-page-wrapper canvas {
+  width: 100% !important;
+  height: auto !important;
+  display: block;
+}
+
+/* PDFテキスト選択用レイヤー (透明な文字をPDFの上にピッタリ重ねる) */
 .textLayer {
   position: absolute;
   top: 0;
@@ -107,25 +208,69 @@ button:disabled {
   bottom: 0;
   overflow: hidden;
   line-height: 1;
+  z-index: 2;
+}
+
+/* テキストを掴みやすく、かつ選択範囲を見やすくする調整 */
+.textLayer span {
+  color: transparent;
+  position: absolute;
+  white-space: pre;
+  cursor: text;
+  transform-origin: 0% 0%;
+  user-select: text !important;
+  -webkit-user-select: text !important;
 }
 
 .textLayer ::selection {
-  background: rgba(0, 120, 255, 0.3);
+  background: rgba(0, 120, 255, 0.35);
 }
 
-/* ハイライト用の要素 */
+/* マーカーハイライト (ページラッパーに直接乗せる) */
 .custom-highlight {
   position: absolute;
-  mix-blend-mode: multiply;
-  pointer-events: auto;
+  mix-blend-mode: multiply; /* 文字が透けて見える効果 */
+  pointer-events: auto;     
   cursor: pointer;
-  z-index: 5;
-  transition: opacity 0.2s, outline 0.2s;
-  border-radius: 2px;
+  z-index: 3;               /* textLayer(z-index:2)より上に重ねる */
+  transition: opacity 0.2s, outline 0.1s;
+  border-radius: 1px;
 }
 
 .custom-highlight:hover {
-  opacity: 0.8 !important;
-  outline: 2px solid rgba(255, 82, 82, 0.8);
+  opacity: 0.85 !important;
+  outline: 2px solid rgba(255, 82, 82, 0.9); /* 削除できることを示す赤い枠 */
   box-sizing: border-box;
+}
+
+/* --- スマホ対応 (Responsive) --- */
+@media (max-width: 768px) {
+  .container { max-width: 100%; }
+  .header { padding: 12px 16px; }
+  .list { padding: 16px 8px; }
+  
+  .headerTop {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .settingsPanel {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .setting-item, .color-item {
+    width: 100%;
+  }
+  
+  .input-small {
+    width: 100%;
+  }
+
+  .saveButton {
+    margin-left: 0;
+    width: 100%;
+  }
 }

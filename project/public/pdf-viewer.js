@@ -1,24 +1,65 @@
 import * as pdfjsLib from './pdfjs/pdf.mjs';
 
-// PDF.jsのWorkerを設定
 pdfjsLib.GlobalWorkerOptions.workerSrc = './pdfjs/pdf.worker.mjs';
 
 let currentPdfDocument = null;
 let currentFileName = "";
-let currentBooks = []; // ブックリストのキャッシュ
+let currentBooks = []; 
+let currentScale = 1.0; // 動的に計算するレンダリングスケール
 
 const fileInput = document.getElementById('file-input');
 const fileNameDisplay = document.getElementById('file-name-display');
 const viewerContainer = document.getElementById('viewer-container');
 const addMarkerBtn = document.getElementById('add-marker-btn');
-
-// 追加したUI要素
 const bookSelect = document.getElementById('book-select');
 const markerLabelInput = document.getElementById('marker-label');
 const markerColorInput = document.getElementById('marker-color');
+const colorPaletteContainer = document.getElementById('color-palette');
 
 // ==========================================
-// ★ UIの調整 (ブック選択プルダウンを隠し、ラベル入力にサジェストを追加)
+// ★ 30種類のカラーパレットの生成
+// ==========================================
+const PALETTE_COLORS = [
+  '#ffcdd2', '#f8bbd0', '#e1bee7', '#d1c4e9', '#c5cae9', '#bbdefb', '#b2ebf2', '#b2dfdb', '#c8e6c9', '#fff9c4',
+  '#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#00bcd4', '#009688', '#4caf50', '#ffeb3b',
+  '#ff0000', '#ff00ff', '#800080', '#0000ff', '#00ffff', '#00ff00', '#ffff00', '#ff9800', '#ff5722', '#9e9e9e'
+];
+
+PALETTE_COLORS.forEach(color => {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'color-swatch';
+  btn.dataset.color = color;
+  btn.style.backgroundColor = color;
+  btn.title = color;
+  colorPaletteContainer.appendChild(btn);
+});
+
+const colorSwatches = document.querySelectorAll('.color-swatch');
+
+function updateColorUI(colorStr) {
+  const normalizedColor = (colorStr || '#ffff00').toLowerCase();
+  markerColorInput.value = normalizedColor;
+  
+  colorSwatches.forEach(swatch => {
+    if (swatch.dataset.color.toLowerCase() === normalizedColor) {
+      swatch.classList.add('selected');
+    } else {
+      swatch.classList.remove('selected');
+    }
+  });
+}
+
+colorSwatches.forEach(swatch => {
+  swatch.addEventListener('click', (e) => {
+    const selectedColor = e.target.dataset.color;
+    updateColorUI(selectedColor);
+    saveCurrentSettings();
+  });
+});
+
+// ==========================================
+// UIの調整と同期
 // ==========================================
 if (bookSelect) {
   bookSelect.style.display = 'none';
@@ -27,7 +68,6 @@ if (bookSelect) {
   }
 }
 
-// ラベル入力欄にサジェスト(datalist)を追加
 let datalist = document.getElementById('label-suggestions');
 if (!datalist) {
   datalist = document.createElement('datalist');
@@ -36,14 +76,10 @@ if (!datalist) {
   markerLabelInput.setAttribute('list', 'label-suggestions');
 }
 
-// ==========================================
-// ★ 設定の初期化と同期
-// ==========================================
 async function initSettings() {
   const data = await chrome.storage.local.get(['wordBook', 'markerLabel', 'markerColor']);
   currentBooks = Array.isArray(data.wordBook) ? data.wordBook : [];
   
-  // ラベルのサジェスト一覧を再構築
   datalist.innerHTML = '';
   const uniqueLabels = [...new Set(currentBooks.map(b => b.markerLabel || '未分類'))];
   uniqueLabels.forEach(label => {
@@ -52,15 +88,10 @@ async function initSettings() {
     datalist.appendChild(opt);
   });
   
-  if (data.markerLabel) {
-    markerLabelInput.value = data.markerLabel;
-  }
-  if (data.markerColor) {
-    markerColorInput.value = data.markerColor;
-  }
+  if (data.markerLabel) markerLabelInput.value = data.markerLabel;
+  if (data.markerColor) updateColorUI(data.markerColor);
 }
 
-// ユーザーがUIを変更した際にストレージへ保存する処理
 async function saveCurrentSettings() {
   await chrome.storage.local.set({
     markerLabel: markerLabelInput.value.trim(),
@@ -68,19 +99,16 @@ async function saveCurrentSettings() {
   });
 }
 
-// ラベル名が変更・選択されたら、既存のブックがあれば色を合わせる
-markerLabelInput.addEventListener('change', (e) => {
+// ★修正: changeイベントからinputイベントに変更することで、datalist（サジェスト）から選択した瞬間に即時で連動するように改善
+markerLabelInput.addEventListener('input', (e) => {
   const label = e.target.value.trim();
   const existingBook = currentBooks.find(b => b.markerLabel === label);
   if (existingBook && existingBook.markerColor) {
-    markerColorInput.value = existingBook.markerColor;
+    updateColorUI(existingBook.markerColor);
   }
   saveCurrentSettings();
 });
 
-markerColorInput.addEventListener('change', saveCurrentSettings);
-
-// ポップアップ側で設定が変わった場合などにリアルタイムでUIを同期
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'local') {
     if (changes.wordBook || changes.markerLabel || changes.markerColor) {
@@ -89,8 +117,11 @@ chrome.storage.onChanged.addListener((changes, area) => {
   }
 });
 
-// 起動時に設定を読み込む
 initSettings();
+
+addMarkerBtn.addEventListener('mousedown', (e) => {
+  e.preventDefault(); 
+});
 
 
 // ==========================================
@@ -130,17 +161,24 @@ async function renderPDF(arrayBuffer) {
     return;
   }
 
+  const firstPage = await currentPdfDocument.getPage(1);
+  const tempViewport = firstPage.getViewport({ scale: 1.0 });
+  const containerWidth = viewerContainer.clientWidth - 40; 
+  
+  currentScale = containerWidth / tempViewport.width;
+  currentScale = Math.max(0.5, Math.min(currentScale, 2.0));
+
   for (let pageNum = 1; pageNum <= currentPdfDocument.numPages; pageNum++) {
     try {
       const page = await currentPdfDocument.getPage(pageNum);
-      const scale = 1.5;
-      const viewport = page.getViewport({ scale: scale });
+      const viewport = page.getViewport({ scale: currentScale });
 
       const pageWrapper = document.createElement('div');
       pageWrapper.className = 'pdf-page-wrapper';
+      pageWrapper.id = `page-wrapper-${pageNum}`;
       pageWrapper.style.width = `${viewport.width}px`;
       pageWrapper.style.height = `${viewport.height}px`;
-      pageWrapper.style.setProperty('--scale-factor', scale);
+      pageWrapper.style.setProperty('--scale-factor', currentScale);
       pageWrapper.dataset.pageNumber = pageNum;
 
       const canvas = document.createElement('canvas');
@@ -165,7 +203,6 @@ async function renderPDF(arrayBuffer) {
       const textContent = await page.getTextContent();
       
       textLayerDiv.innerHTML = '';
-      textLayerDiv.style.color = 'transparent';
 
       for (const item of textContent.items) {
         if (!item.str || item.str.trim() === '') continue;
@@ -175,16 +212,14 @@ async function renderPDF(arrayBuffer) {
         
         const [x, y] = viewport.convertToViewportPoint(item.transform[4], item.transform[5]);
         const fontHeight = Math.sqrt(item.transform[2] * item.transform[2] + item.transform[3] * item.transform[3]);
-        const scaledFontHeight = fontHeight * scale;
+        const scaledFontHeight = fontHeight * currentScale;
         
         span.style.position = 'absolute';
         span.style.left = `${x}px`;
-        span.style.top = `${y - scaledFontHeight * 0.8}px`;
+        span.style.top = `${y - scaledFontHeight * 0.85}px`; 
         span.style.fontSize = `${scaledFontHeight}px`;
         span.style.fontFamily = item.fontName || 'sans-serif';
         span.style.lineHeight = 1;
-        span.style.whiteSpace = 'pre';
-        span.style.cursor = 'text';
         
         textLayerDiv.appendChild(span);
       }
@@ -195,7 +230,6 @@ async function renderPDF(arrayBuffer) {
   }
 }
 
-// 他のタブ(Webページ)へ更新をリアルタイム通知する処理
 async function notifyTabsWordCardsUpdated() {
   const data = await chrome.storage.local.get(['wordCard', 'wordBook']);
   const cards = Array.isArray(data.wordCard) ? data.wordCard : [];
@@ -214,7 +248,6 @@ async function notifyTabsWordCardsUpdated() {
   });
 }
 
-
 // ==========================================
 // マーカー追加・復元・削除
 // ==========================================
@@ -227,14 +260,31 @@ addMarkerBtn.addEventListener('click', async () => {
     return;
   }
 
-  // ★UIに入力されている情報を取得
+  const range = selection.getRangeAt(0);
+  let parent = range.commonAncestorContainer;
+  while (parent && parent !== document.body) {
+    if (parent.classList && parent.classList.contains('pdf-page-wrapper')) {
+      break;
+    }
+    parent = parent.parentNode;
+  }
+  
+  const pageWrapper = (parent && parent.classList?.contains('pdf-page-wrapper')) 
+    ? parent 
+    : viewerContainer.querySelector('.pdf-page-wrapper');
+    
+  if (!pageWrapper) {
+    alert("ページの特定に失敗しました。もう一度選択してください。");
+    return;
+  }
+
+  const pageNum = parseInt(pageWrapper.dataset.pageNumber);
   const color = markerColorInput.value;
   const label = markerLabelInput.value.trim() || 'default';
   
   const data = await chrome.storage.local.get(['wordCard', 'wordBook', 'highlights']);
   const books = Array.isArray(data.wordBook) ? data.wordBook : [];
   
-  // ★ラベル名からbookIdを自動決定 (一致するものがなければ新規ID)
   let targetBookId;
   const matchedBook = books.find(b => b.markerLabel === label);
   if (matchedBook) {
@@ -244,9 +294,9 @@ addMarkerBtn.addEventListener('click', async () => {
   }
 
   const newId = crypto.randomUUID();
-  drawHighlightFromSelection(selection, newId, color);
+  
+  drawHighlightFromRangeOnPage(range, pageWrapper, newId, color);
 
-  // content.js と完全に一致する型定義
   const newHighlight = {
     id: newId,
     question: text,               
@@ -255,8 +305,8 @@ addMarkerBtn.addEventListener('click', async () => {
     markerLabel: label,    
     bookId: targetBookId,        
     learned: false,               
-    // 以下はPDF復元のための拡張プロパティ（無駄な重複を削除）
     pdf: currentFileName,         
+    pageNum: pageNum, 
     createdAt: Date.now()
   };
 
@@ -270,7 +320,6 @@ addMarkerBtn.addEventListener('click', async () => {
   books.forEach(b => bookMap.set(b.bookId || b.id, b));
   
   if (!bookMap.has(targetBookId)) {
-      // 新規ブックの場合はリストに追加
       bookMap.set(targetBookId, {
           id: targetBookId,
           bookId: targetBookId,
@@ -278,7 +327,6 @@ addMarkerBtn.addEventListener('click', async () => {
           markerLabel: label
       });
   } else {
-      // 既存ブックでも、色などが変更されていれば上書き更新する
       const b = bookMap.get(targetBookId);
       b.markerColor = color;
       b.markerLabel = label;
@@ -289,7 +337,6 @@ addMarkerBtn.addEventListener('click', async () => {
       wordCard: wordCards, 
       highlights: highlights,
       wordBook: updatedBooks,
-      // 次回のために現在の設定をストレージに記憶させる
       markerLabel: label,
       markerColor: color
   });
@@ -299,12 +346,9 @@ addMarkerBtn.addEventListener('click', async () => {
   selection.removeAllRanges();
 });
 
-function drawHighlightFromSelection(selection, id, color) {
-  if (selection.rangeCount === 0) return;
-  const range = selection.getRangeAt(0);
-  
+function drawHighlightFromRangeOnPage(range, pageWrapper, id, color) {
   const rects = range.getClientRects();
-  const containerRect = viewerContainer.getBoundingClientRect();
+  const pageRect = pageWrapper.getBoundingClientRect();
 
   for (let rect of rects) {
     const highlightDiv = document.createElement('div');
@@ -313,8 +357,8 @@ function drawHighlightFromSelection(selection, id, color) {
     highlightDiv.style.backgroundColor = color;
     highlightDiv.style.opacity = '0.4';
     
-    const top = rect.top - containerRect.top + viewerContainer.scrollTop;
-    const left = rect.left - containerRect.left + viewerContainer.scrollLeft;
+    const top = rect.top - pageRect.top;
+    const left = rect.left - pageRect.left;
     
     highlightDiv.style.top = `${top}px`;
     highlightDiv.style.left = `${left}px`;
@@ -322,9 +366,12 @@ function drawHighlightFromSelection(selection, id, color) {
     highlightDiv.style.height = `${rect.height}px`;
     
     highlightDiv.title = "クリックで削除";
-    highlightDiv.addEventListener('click', () => removeMarker(id));
+    highlightDiv.addEventListener('click', (e) => {
+      e.stopPropagation();
+      removeMarker(id);
+    });
     
-    viewerContainer.appendChild(highlightDiv);
+    pageWrapper.appendChild(highlightDiv);
   }
 }
 
@@ -339,7 +386,6 @@ async function restoreHighlights() {
     window.getSelection().removeAllRanges();
     window.scrollTo(0, 0);
     
-    // 復元時も content.js と共通のプロパティ（question, markerColor）を利用する
     const targetText = hl.question;
     const drawColor = hl.markerColor;
     
@@ -349,7 +395,23 @@ async function restoreHighlights() {
     
     if (found) {
       const selection = window.getSelection();
-      drawHighlightFromSelection(selection, hl.id, drawColor);
+      const range = selection.getRangeAt(0);
+      
+      let parent = range.commonAncestorContainer;
+      while (parent && parent !== document.body) {
+        if (parent.classList && parent.classList.contains('pdf-page-wrapper')) {
+          break;
+        }
+        parent = parent.parentNode;
+      }
+      
+      const pageWrapper = (parent && parent.classList?.contains('pdf-page-wrapper')) 
+        ? parent 
+        : viewerContainer.querySelector('.pdf-page-wrapper');
+        
+      if (pageWrapper) {
+        drawHighlightFromRangeOnPage(range, pageWrapper, hl.id, drawColor);
+      }
     }
   });
 
