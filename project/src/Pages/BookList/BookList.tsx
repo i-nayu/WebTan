@@ -16,6 +16,12 @@ interface WordBook {
     markerLabel: string;   // 単語帳名
 }
 
+const PALETTE_COLORS: string[] = [
+  '#ffcdd2', '#f8bbd0', '#e1bee7', '#d1c4e9', '#c5cae9', '#bbdefb', '#b2ebf2', '#b2dfdb', '#c8e6c9', '#fff9c4',
+  '#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#00bcd4', '#009688', '#4caf50', '#ffeb3b',
+  '#ff0000', '#ff00ff', '#800080', '#0000ff', '#00ffff', '#00ff00', '#ffff00', '#ff9800', '#ff5722', '#9e9e9e'
+];
+
 
 const WordBookList: React.FC = () => {
 
@@ -670,18 +676,34 @@ const WordBookList: React.FC = () => {
                                 />
                             </label>
 
-                            <label className={styles.field}>
-                                <span className={styles.fieldLabel}>マーカー色</span>
-                                <div className={styles.colorInputRow}>
-                                    <input
-                                        className={styles.colorInput}
-                                        type="color"
-                                        value={newBookColor}
-                                        onChange={(event) => setNewBookColor(event.target.value)}
-                                    />
-                                    <span className={styles.colorCode}>{newBookColor}</span>
-                                </div>
-                            </label>
+                           <label className={styles.field}>
+    <span className={styles.fieldLabel}>マーカー色</span>
+    
+    {/* カラーパレットの表示 */}
+    <div className={styles.colorPalette}>
+        {PALETTE_COLORS.map((color) => (
+            <button
+                key={color}
+                type="button" /* フォームの送信を防ぐために必須 */
+                className={`${styles.paletteButton} ${newBookColor === color ? styles.activeColor : ''}`}
+                style={{ backgroundColor: color }}
+                onClick={() => setNewBookColor(color)}
+                title={color}
+            />
+        ))}
+    </div>
+
+    {/* カスタム色選択（現在の実装をそのまま活用） */}
+    <div className={styles.colorInputRow}>
+        <input
+            className={styles.colorInput}
+            type="color"
+            value={newBookColor}
+            onChange={(event) => setNewBookColor(event.target.value)}
+        />
+        <span className={styles.colorCode}>{newBookColor}</span>
+    </div>
+</label>
 
                             <div className={styles.formButtons}>
                                 <button
