@@ -57,7 +57,7 @@ WebページやPDFを読みながら学習するとき、気になった語句�
 | 操作通知 | React Toastify |
 | 静的解析 | ESLint |
 
-##セットアップ
+## セットアップ
 詳細は[紹介サイト](https://topaz.dev/projects/3eec3840a5f3336cbd87)をご覧ください。
 
 ### 必要なもの
