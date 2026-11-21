@@ -103,10 +103,13 @@ Chromeで `chrome://extensions/shortcuts` を開き、「タンタン」の次�
 
 1. 拡張機能の設定画面で、単語帳を作成・選択します。
 2. 語句を集めたいWebページを開きます。すでに開いていた場合は再読み込みします。
-3. 「起動/終了」のショートカットでマーカーを有効にします。
-4. 覚えたい語句をドラッグして選択します。
+3. 「起動/終了」のショートカットでマーカーを有効にします。（右上にタンタンのアイコンが表示されます）<img width="1511" height="912" alt="image" src="https://github.com/user-attachments/assets/1a056f6d-0f87-4ab9-bee7-1bc412138237" />
+
+4. 覚えたい語句をドラッグして選択します。<img width="1503" height="862" alt="image" src="https://github.com/user-attachments/assets/991833ed-b2ea-455b-95e5-e5b457eed9b0" />
+
 5. 「単語を送信」のショートカットで保存します。
-6. Webアプリで語句を確認し、答えや説明を追加して学習します。
+6. Webアプリで語句を確認し、答えや説明を追加して学習します。<img width="1128" height="861" alt="image" src="https://github.com/user-attachments/assets/c110f6c7-b796-4254-9563-4421c0e43520" />
+
 
 #### PDFから集める
 
