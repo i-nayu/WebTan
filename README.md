@@ -113,11 +113,15 @@ Chromeで `chrome://extensions/shortcuts` を開き、「タンタン」の次�
 
 #### PDFから集める
 
-1. 拡張機能の設定画面からPDFビューアを開きます。
-2. 学習したいPDFファイルを読み込みます。
+1. 拡張機能の設定画面（右上のアイコンを選択）からPDFビューアを開きます。<img width="468" height="661" alt="image" src="https://github.com/user-attachments/assets/9eddcc69-c215-4850-bdb7-f7c6f520d837" />
+
+2. 学習したいPDFファイルを読み込みます。<img width="1210" height="860" alt="image" src="https://github.com/user-attachments/assets/197ae008-29b5-4706-9175-5849f3dcfc5d" />
+
 3. 保存先のラベルとマーカー色を設定します。
-4. 覚えたい語句を選択し、「マーカーを引く」を押して保存します。
-5. Webアプリで保存した語句を確認します。
+4. 覚えたい語句を選択し、「マーカーを引く」を押して保存します。<img width="1208" height="861" alt="image" src="https://github.com/user-attachments/assets/407fd8a0-95e3-415d-aba9-f24435a01fb1" />
+
+5. Webアプリで保存した語句を確認します。<img width="1141" height="866" alt="image" src="https://github.com/user-attachments/assets/bffe41c3-170a-46e8-b826-cb6d0ff61b8d" />
+
 
 ### AI機能の設定（任意）
 
