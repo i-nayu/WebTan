@@ -76,10 +76,10 @@ WebページやPDFを読みながら学習するとき、気になった語句�
 1. Chromeのアドレスバーに `chrome://extensions/` と入力して開きます。
 2. 画面右上の「デベロッパーモード」を有効にします。
 3. 「パッケージ化されていない拡張機能を読み込む」を選択します。
-4. 展開したフォルダ内の `project/public` フォルダを指定します。
-5. 一覧に「タンタン」が追加されたことを確認します。
+4. 展開したフォルダ内の `project/public` フォルダを指定します。<img width="679" height="451" alt="image" src="https://github.com/user-attachments/assets/d89732a8-dde3-496f-b129-e1a99ad23079" />
 
-Chromeのツールバーにある拡張機能メニューから「タンタン」を固定すると、設定画面を開きやすくなります。
+5. 一覧に「タンタン」が追加されたことを確認します。<img width="1512" height="665" alt="image" src="https://github.com/user-attachments/assets/468faa87-fed0-499f-8e47-a13f6ea8f225" />
+
 
 ### 3. ショートカットキーを設定
 
@@ -87,6 +87,7 @@ Chromeで `chrome://extensions/shortcuts` を開き、「タンタン」の次�
 
 | 操作 | 役割 |
 | --- | --- |
+| 拡張機能を有効にする | 単語帳やマーカー色の設定画面を開く(任意) |
 | 起動/終了 | Webページ上のマーカー機能を切り替える |
 | 単語を送信 | マークした語句を保存する |
 
