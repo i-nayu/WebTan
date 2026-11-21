@@ -93,7 +93,7 @@ Chromeで `chrome://extensions/shortcuts` を開き、「タンタン」の次�
 
 ### 4. Webアプリを開く
 
-[Webアプリを開く](RENDER_PUBLIC_URL)
+[Webアプリを開く](https://tantan-0wp4.onrender.com/)
 
 拡張機能を追加する前から開いていた場合は、ページを再読み込みしてください。
 
